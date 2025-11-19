@@ -1,6 +1,0 @@
-@AutoStack.Presentation_HostAddress = http://localhost:5211
-
-GET {{AutoStack.Presentation_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
