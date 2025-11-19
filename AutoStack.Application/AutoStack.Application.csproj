@@ -10,4 +10,14 @@
         <ProjectReference Include="..\AutoStack.Domain\AutoStack.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Common\Behaviours\" />
+      <Folder Include="DTOs\Users\" />
+      <Folder Include="Features\Users\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MediatR" Version="13.1.0" />
+    </ItemGroup>
+
 </Project>
