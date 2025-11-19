@@ -1,0 +1,25 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# NuGet
+packages/
+*.nupkg
+
+# Build results
+*.dll
+*.exe
+*.pdb
+
+# OS
+.DS_Store
+Thumbs.db
