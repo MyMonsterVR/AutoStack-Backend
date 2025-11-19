@@ -11,12 +11,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Common\Behaviours\" />
-      <Folder Include="DTOs\Users\" />
-      <Folder Include="Features\Users\" />
+      <Folder Include="Features\Users\Queries\" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="FluentValidation" Version="12.1.0" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
       <PackageReference Include="MediatR" Version="13.1.0" />
     </ItemGroup>
 
