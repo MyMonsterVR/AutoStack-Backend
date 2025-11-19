@@ -10,4 +10,9 @@
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\AutoStack.Application\AutoStack.Application.csproj" />
+        <ProjectReference Include="..\AutoStack.Infrastructure\AutoStack.Infrastructure.csproj" />
+    </ItemGroup>
+
 </Project>

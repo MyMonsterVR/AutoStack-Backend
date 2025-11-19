@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\AutoStack.Domain\AutoStack.Domain.csproj" />
+    </ItemGroup>
+
 </Project>
