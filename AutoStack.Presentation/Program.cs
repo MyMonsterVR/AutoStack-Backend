@@ -1,8 +1,10 @@
+using System.Text;
 using AutoStack.Application;
 using AutoStack.Infrastructure;
 using AutoStack.Presentation;
 using AutoStack.Presentation.Endpoints.Login;
 using AutoStack.Presentation.Endpoints.User;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,9 +18,10 @@ builder.Host.UseDefaultServiceProvider(options =>
 builder.Services.AddPresentation();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAuthorizationService();
 
 var app = builder.Build();
-    
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -27,10 +30,17 @@ if (app.Environment.IsDevelopment())
         // Oh, you wanted to use light mode? nah, that's not allowed in our docs
         options.DarkMode = true;
         options.HideDarkModeToggle = true;
+        options.Authentication = new ScalarAuthenticationOptions()
+        {
+            PreferredSecuritySchemes = ["Bearer"]
+        };
     });
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapUserEndpoints();
 app.MapLoginEndpoints();
