@@ -7,13 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="MediatR" Version="13.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0"/>
         <PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\AutoStack.Application\AutoStack.Application.csproj" />
-        <ProjectReference Include="..\AutoStack.Infrastructure\AutoStack.Infrastructure.csproj" />
+        <ProjectReference Include="../AutoStack.Application/AutoStack.Application.csproj" />
+        <ProjectReference Include="../AutoStack.Infrastructure/AutoStack.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

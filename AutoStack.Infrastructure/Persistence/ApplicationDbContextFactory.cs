@@ -8,7 +8,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
-        // Find the Presentation project folder
+        // Find the solution root and Presentation project folder
         var currentPath = Directory.GetCurrentDirectory();
         var presentationPath = Path.Combine(currentPath, "AutoStack.Presentation");
 
@@ -25,11 +25,8 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        // Ensure the database is created in the Presentation folder
-        var absoluteConnectionString = connectionString?.Replace("Data Source=", $"Data Source={presentationPath}\\");
-
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        optionsBuilder.UseSqlite(absoluteConnectionString);
+        optionsBuilder.UseSqlite(connectionString);
 
         return new ApplicationDbContext(optionsBuilder.Options);
     }

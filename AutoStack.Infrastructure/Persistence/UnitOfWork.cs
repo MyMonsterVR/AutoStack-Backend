@@ -1,9 +1,8 @@
 ﻿using AutoStack.Application.Common.Interfaces;
 using AutoStack.Domain.Repositories;
-using AutoStack.Infrastructure.Persistence;
 using AutoStack.Infrastructure.Repositories;
 
-namespace AutoStack.Infrastructure;
+namespace AutoStack.Infrastructure.Persistence;
 
 public class UnitOfWork(ApplicationDbContext dbContext, IUserRepository? userRepository) : IUnitOfWork
 {

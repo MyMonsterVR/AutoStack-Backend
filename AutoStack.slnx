@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AutoStack.Application/AutoStack.Application.csproj" />
+  <Project Path="AutoStack.Domain/AutoStack.Domain.csproj" />
+  <Project Path="AutoStack.Infrastructure/AutoStack.Infrastructure.csproj" />
+  <Project Path="AutoStack.Presentation/AutoStack.Presentation.csproj" />
+</Solution>
