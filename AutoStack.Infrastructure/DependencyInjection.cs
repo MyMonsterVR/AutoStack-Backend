@@ -1,4 +1,5 @@
 ﻿using AutoStack.Application.Common.Interfaces;
+using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Domain.Repositories;
 using AutoStack.Infrastructure.Persistence;
 using AutoStack.Infrastructure.Repositories;
@@ -19,6 +20,8 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IAuthentication, Authentication>();
+        services.AddScoped<IToken, Token>();
 
         return services;
     }

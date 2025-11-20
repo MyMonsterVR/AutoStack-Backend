@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using AutoStack.Application.Common.Interfaces;
+using AutoStack.Application.Common.Interfaces.Auth;
 using Konscious.Security.Cryptography;
 
 namespace AutoStack.Infrastructure.Security;

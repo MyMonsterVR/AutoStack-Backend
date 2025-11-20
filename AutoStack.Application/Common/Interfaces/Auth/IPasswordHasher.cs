@@ -1,4 +1,4 @@
-﻿namespace AutoStack.Application.Common.Interfaces;
+﻿namespace AutoStack.Application.Common.Interfaces.Auth;
 
 public interface IPasswordHasher
 {

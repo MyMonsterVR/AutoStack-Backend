@@ -1,4 +1,6 @@
 ﻿using AutoStack.Application.Common.Interfaces;
+using AutoStack.Application.Common.Interfaces.Auth;
+using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
 using AutoStack.Domain.Entities;
 using AutoStack.Domain.Repositories;
@@ -10,7 +12,7 @@ public class CreateUserCommandHandler(IUserRepository userRepository, IPasswordH
 {
     public async Task<Result<int>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = User.CreateUser(request.Email, request.Password);
+        var user = User.CreateUser(request.Email, request.Username);
 
         var passwordHashed = passwordHasher.HashPassword(request.Password);
         user.SetPassword(passwordHashed);

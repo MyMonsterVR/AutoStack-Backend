@@ -1,6 +1,7 @@
 using AutoStack.Application;
 using AutoStack.Infrastructure;
 using AutoStack.Presentation;
+using AutoStack.Presentation.Endpoints.Login;
 using AutoStack.Presentation.Endpoints.User;
 using Scalar.AspNetCore;
 
@@ -32,5 +33,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapUserEndpoints();
+app.MapLoginEndpoints();
 
 await app.RunAsync();
