@@ -1,4 +1,3 @@
-using AutoStack.Application.Common.Exceptions;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
@@ -14,18 +13,17 @@ public class LoginCommandHandler(IAuthentication authentication, IUserRepository
 
         if (userId == null || userId.Value == Guid.Empty)
         {
-            throw new AuthenticationException("Invalid username or password");
+            return Result<string>.Failure("Invalid username or password");
         }
-        
+
         var user = await userRepository.GetByIdAsync(userId.Value, cancellationToken);
         if (user == null)
         {
-            throw new AuthenticationException("User not found");
+            return Result<string>.Failure("User not found");
         }
-        
-        
+
         var userToken = token.GenerateAccessToken(userId.Value, user.Username, user.Email);
-        
+
         return Result<string>.Success(userToken);
     }
 }
