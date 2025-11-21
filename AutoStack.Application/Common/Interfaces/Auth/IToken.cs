@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using AutoStack.Application.Common.Models;
+using AutoStack.Domain.Entities;
 
 namespace AutoStack.Application.Common.Interfaces.Auth;
 
@@ -19,7 +19,7 @@ public interface IToken
     /// </summary>
     /// <param name="userId">The users id</param>
     /// <returns>Refresh token data</returns>
-    RefreshTokenData GenerateRefreshToken(Guid userId);
+    RefreshToken GenerateRefreshToken(Guid userId);
     
     /// <summary>
     /// Verifies a token is valid

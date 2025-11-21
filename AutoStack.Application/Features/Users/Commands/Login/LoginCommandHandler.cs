@@ -1,3 +1,4 @@
+using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
@@ -5,7 +6,13 @@ using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Users.Commands.Login;
 
-public class LoginCommandHandler(IAuthentication authentication, IUserRepository userRepository, IToken token) : ICommandHandler<LoginCommand, string>
+public class LoginCommandHandler(
+    IAuthentication authentication,
+    IUserRepository userRepository,
+    IRefreshTokenRepository refreshTokenRepository,
+    IToken token,
+    IUnitOfWork unitOfWork)
+    : ICommandHandler<LoginCommand, string>
 {
     public async Task<Result<string>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -22,8 +29,13 @@ public class LoginCommandHandler(IAuthentication authentication, IUserRepository
             return Result<string>.Failure("User not found");
         }
 
-        var userToken = token.GenerateAccessToken(userId.Value, user.Username, user.Email);
+        var generatedToken = token.GenerateAccessToken(userId.Value, user.Username, user.Email);
 
-        return Result<string>.Success(userToken);
+        var userToken = token.GenerateRefreshToken(userId.Value);
+        
+        await refreshTokenRepository.AddAsync(userToken, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<string>.Success(generatedToken);
     }
 }

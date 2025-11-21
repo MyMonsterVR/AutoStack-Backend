@@ -4,11 +4,11 @@ namespace AutoStack.Domain.Entities;
 
 public class User : Entity<Guid>
 {
-    public string Email { get; set; } = null!;
-    public string Username { get; set; } = null!;
+    public string Email { get; init; } = null!;
+    public string Username { get; init; } = null!;
     public string PasswordHash { get; private set; } = null!;
     
-    public User() : base()
+    public User()
     {}
 
     private User(Guid id, string email, string username) : base(id)

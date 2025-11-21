@@ -11,14 +11,38 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoStack.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251119225705_User Table Initial")]
-    partial class UserTableInitial
+    [Migration("20251121205541_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
+
+            modelBuilder.Entity("AutoStack.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar")
+                        .HasColumnName("RefreshToken");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Token");
+
+                    b.ToTable("RefreshTokens");
+                });
 
             modelBuilder.Entity("AutoStack.Domain.Entities.User", b =>
                 {

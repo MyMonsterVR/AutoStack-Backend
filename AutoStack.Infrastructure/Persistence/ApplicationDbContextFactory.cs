@@ -8,11 +8,9 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
-        // Find the solution root and Presentation project folder
         var currentPath = Directory.GetCurrentDirectory();
         var presentationPath = Path.Combine(currentPath, "AutoStack.Presentation");
 
-        // If we're in a subdirectory (like Infrastructure), go up one level
         if (!Directory.Exists(presentationPath))
         {
             presentationPath = Path.Combine(currentPath, "..", "AutoStack.Presentation");
@@ -20,7 +18,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(presentationPath)
-            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("appsettings.production.json", optional: false)
             .Build();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");

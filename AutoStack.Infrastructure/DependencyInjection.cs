@@ -19,18 +19,20 @@ public static class DependencyInjection
     {
         public void AddInfrastructure(IConfiguration configuration)
         {
-            // Configure JwtSettings from appsettings.json
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
-
+            
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IAuthentication, Authentication>();
             services.AddScoped<IToken, Token>();
         }
+
         public void AddAuthorizationService(IConfiguration configuration)
         {
             var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();

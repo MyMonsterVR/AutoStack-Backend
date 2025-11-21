@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Common.Models;
+using AutoStack.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -18,10 +19,8 @@ public class Token(IOptions<JwtSettings> jwtSettings) : IToken
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Nickname, username),
-            new Claim(JwtRegisteredClaimNames.Email, email),
             new Claim(JwtRegisteredClaimNames.NameId, userId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, 
+            new Claim(JwtRegisteredClaimNames.Iat,
                 new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), 
                 ClaimValueTypes.Integer64)
         };
@@ -40,19 +39,18 @@ public class Token(IOptions<JwtSettings> jwtSettings) : IToken
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
-    public RefreshTokenData GenerateRefreshToken(Guid userId)
+    public RefreshToken GenerateRefreshToken(Guid userId)
     {
         var randomNumber = new byte[64];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
         var token = Convert.ToBase64String(randomNumber);
         
-        return new RefreshTokenData
+        return new RefreshToken
         {
             Token = token,
             UserId = userId,
             ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
-            CreatedAt = DateTime.UtcNow
         };
     }
     

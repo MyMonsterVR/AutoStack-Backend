@@ -5,6 +5,7 @@ namespace AutoStack.Application.Common.Interfaces;
 public interface IUnitOfWork
 {
     IUserRepository Users { get; }
+    IRefreshTokenRepository RefreshTokenRepository { get; }
     
     /// <summary>
     /// Saves all pending changes to the database.
