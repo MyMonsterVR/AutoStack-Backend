@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using AutoStack.Application.Common.Models;
+
 namespace AutoStack.Application.Common.Interfaces.Auth;
 
 public interface IToken
@@ -15,13 +18,13 @@ public interface IToken
     /// Generates a refresh token
     /// </summary>
     /// <param name="userId">The users id</param>
-    /// <returns></returns>
-    string GenerateRefreshToken(Guid userId);
+    /// <returns>Refresh token data</returns>
+    RefreshTokenData GenerateRefreshToken(Guid userId);
     
     /// <summary>
     /// Verifies a token is valid
     /// </summary>
     /// <param name="token">The users auth token</param>
-    /// <returns></returns>
-    bool VerifyToken(string token);
+    /// <returns>The Claims principal and null if invalid</returns>
+    ClaimsPrincipal? VerifyToken(string token);
 }

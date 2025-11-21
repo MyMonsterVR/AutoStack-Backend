@@ -12,7 +12,7 @@ public class CreateUserCommandHandler(IUserRepository userRepository, IPasswordH
 {
     public async Task<Result<int>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = User.CreateUser(request.Email, request.Username);
+        var user = User.CreateUser(request.Email.ToLower(), request.Username.ToLower());
 
         var passwordHashed = passwordHasher.HashPassword(request.Password);
         user.SetPassword(passwordHashed);

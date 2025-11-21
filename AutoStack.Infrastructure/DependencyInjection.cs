@@ -19,6 +19,9 @@ public static class DependencyInjection
     {
         public void AddInfrastructure(IConfiguration configuration)
         {
+            // Configure JwtSettings from appsettings.json
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
@@ -28,9 +31,13 @@ public static class DependencyInjection
             services.AddScoped<IAuthentication, Authentication>();
             services.AddScoped<IToken, Token>();
         }
-
-        public void AddAuthorizationService()
+        public void AddAuthorizationService(IConfiguration configuration)
         {
+            var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+            if (jwtSettings == null)
+                throw new InvalidOperationException("JwtSettings configuration is missing");
+
             services.AddAuthorization()
                 .AddAuthentication(x =>
                 {
@@ -43,10 +50,14 @@ public static class DependencyInjection
                     x.SaveToken = true;
                     x.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuerSigningKey = false,
-                        IssuerSigningKey = new SymmetricSecurityKey("your_jwt_key"u8.ToArray()),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = jwtSettings.Audience,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero
                     };
                 });
         }

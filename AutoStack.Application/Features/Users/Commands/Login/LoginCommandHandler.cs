@@ -9,7 +9,7 @@ public class LoginCommandHandler(IAuthentication authentication, IUserRepository
 {
     public async Task<Result<string>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var userId = await authentication.ValidateAuthenticationAsync(request.Username, request.Password, cancellationToken);
+        var userId = await authentication.ValidateAuthenticationAsync(request.Username.ToLower(), request.Password, cancellationToken);
 
         if (userId == null || userId.Value == Guid.Empty)
         {

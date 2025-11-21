@@ -18,7 +18,7 @@ builder.Host.UseDefaultServiceProvider(options =>
 builder.Services.AddPresentation();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddAuthorizationService();
+builder.Services.AddAuthorizationService(builder.Configuration);
 
 var app = builder.Build();
 
