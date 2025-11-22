@@ -19,16 +19,22 @@ namespace AutoStack.Infrastructure.Migrations
 
             modelBuilder.Entity("AutoStack.Domain.Entities.RefreshToken", b =>
                 {
-                    b.Property<string>("Token")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar")
-                        .HasColumnName("RefreshToken");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ExpiresAt")
+                        .HasColumnType("int")
+                        .HasComment("Epoch time that the refresh token expires at.");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("RefreshToken");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -36,7 +42,12 @@ namespace AutoStack.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Token");
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
                 });

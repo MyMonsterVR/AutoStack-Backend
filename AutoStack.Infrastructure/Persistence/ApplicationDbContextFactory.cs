@@ -16,9 +16,13 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             presentationPath = Path.Combine(currentPath, "..", "AutoStack.Presentation");
         }
 
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                          ?? "Development";
+
         var configuration = new ConfigurationBuilder()
             .SetBasePath(presentationPath)
-            .AddJsonFile("appsettings.production.json", optional: false)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{environment}.json", optional: false, reloadOnChange: true)
             .Build();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");

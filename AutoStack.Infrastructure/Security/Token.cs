@@ -46,12 +46,8 @@ public class Token(IOptions<JwtSettings> jwtSettings) : IToken
         rng.GetBytes(randomNumber);
         var token = Convert.ToBase64String(randomNumber);
         
-        return new RefreshToken
-        {
-            Token = token,
-            UserId = userId,
-            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
-        };
+        var unixTimestamp = (int)DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        return RefreshToken.Create(token, userId, unixTimestamp);
     }
     
     public ClaimsPrincipal? VerifyToken(string token)

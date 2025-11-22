@@ -15,15 +15,16 @@ namespace AutoStack.Infrastructure.Migrations
                 name: "RefreshTokens",
                 columns: table => new
                 {
-                    RefreshToken = table.Column<string>(type: "nvarchar", maxLength: 128, nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    RefreshToken = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
                     UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ExpiresAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ExpiresAt = table.Column<int>(type: "int", nullable: false, comment: "Epoch time that the refresh token expires at."),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RefreshTokens", x => x.RefreshToken);
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -41,6 +42,17 @@ namespace AutoStack.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_RefreshToken",
+                table: "RefreshTokens",
+                column: "RefreshToken",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",

@@ -8,18 +8,24 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
-        builder.HasKey(r => r.Token);
+        builder.HasKey(r => r.Id);
 
         builder.Property(r => r.Token)
             .HasColumnName("RefreshToken")
-            .HasColumnType("nvarchar")
             .HasMaxLength(128)
             .IsRequired();
 
         builder.Property(r => r.ExpiresAt)
+            .HasColumnType("int")
+            .HasComment("Epoch time that the refresh token expires at.")
             .IsRequired();
         
         builder.Property(r => r.UserId)
             .IsRequired();
+
+        builder.HasIndex(r => r.UserId);
+        
+        builder.HasIndex(r => r.Token)
+            .IsUnique();
     }
 }

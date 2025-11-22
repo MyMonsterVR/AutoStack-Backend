@@ -1,5 +1,6 @@
 ﻿using AutoStack.Application.Features.Users.Commands.CreateUser;
 using AutoStack.Application.Features.Users.Commands.Login;
+using AutoStack.Application.Features.Users.Commands.RefreshToken;
 using AutoStack.Application.Features.Users.Queries.GetUser;
 using MediatR;
 
@@ -15,6 +16,11 @@ public static class LoginEndpoints
         group.MapPost("/", Login)
             .WithName("Login")
             .WithSummary("User login")
+            .Produces(200)
+            .Produces(400);
+        
+        group.MapPost("/refreshtoken", RefreshToken)
+            .WithName("RefreshToken")
             .Produces(200)
             .Produces(400);
     }
@@ -40,7 +46,29 @@ public static class LoginEndpoints
         return Results.Ok(new
         {
             success = true,
-            message = result.Value
+            data = result.Value
+        });
+    }
+
+    private static async Task<IResult> RefreshToken(
+        RefreshTokenCommand command,
+        IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
         });
     }
 }

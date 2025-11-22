@@ -1,6 +1,7 @@
 ﻿using AutoStack.Domain.Entities;
 using AutoStack.Domain.Repositories;
 using AutoStack.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace AutoStack.Infrastructure.Repositories;
 
@@ -31,6 +32,12 @@ public class RefreshTokenRepository(ApplicationDbContext dbContext) : IRefreshTo
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Users.FindAsync([id], cancellationToken) != null;
+        return await dbContext.RefreshTokens.FindAsync([id], cancellationToken) != null;
+    }
+
+    public async Task<RefreshToken?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        return await dbContext.RefreshTokens
+            .FirstOrDefaultAsync(rt => rt.Token == refreshToken, cancellationToken);
     }
 }
