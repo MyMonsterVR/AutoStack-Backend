@@ -21,7 +21,7 @@ public static class DependencyInjection
         services.Configure<Security.Models.CookieSettings>(configuration.GetSection("CookieSettings"));
 
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
