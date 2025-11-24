@@ -1,8 +1,9 @@
-﻿using AutoStack.Application.Features.Users.Commands.CreateUser;
 using AutoStack.Application.Features.Users.Commands.Login;
 using AutoStack.Application.Features.Users.Commands.RefreshToken;
-using AutoStack.Application.Features.Users.Queries.GetUser;
+using AutoStack.Infrastructure.Security;
+using AutoStack.Infrastructure.Security.Models;
 using MediatR;
+using Microsoft.Extensions.Options;
 
 namespace AutoStack.Presentation.Endpoints.Login;
 
@@ -18,17 +19,25 @@ public static class LoginEndpoints
             .WithSummary("User login")
             .Produces(200)
             .Produces(400);
-        
+
         group.MapPost("/refresh", RefreshToken)
             .WithName("RefreshToken")
             .WithSummary("Refresh token")
             .Produces(200)
             .Produces(400);
+
+        group.MapPost("/logout", Logout)
+            .WithName("Logout")
+            .WithSummary("Logout user")
+            .Produces(200);
     }
 
     private static async Task<IResult> Login(
         LoginCommand command,
         IMediator mediator,
+        ICookieManager cookieManager,
+        IOptions<JwtSettings> jwtSettings,
+        HttpContext httpContext,
         CancellationToken cancellationToken
     )
     {
@@ -44,22 +53,50 @@ public static class LoginEndpoints
             });
         }
 
+        cookieManager.SetAccessTokenCookie(
+            httpContext,
+            result.Value.AccessToken,
+            jwtSettings.Value.ExpirationMinutes
+        );
+
+        cookieManager.SetRefreshTokenCookie(
+            httpContext,
+            result.Value.RefreshToken,
+            jwtSettings.Value.RefreshTokenExpirationDays
+        );
+
         return Results.Ok(new
         {
             success = true,
-            data = result.Value
+            message = "Login successful"
         });
     }
 
     private static async Task<IResult> RefreshToken(
-        RefreshTokenCommand command,
         IMediator mediator,
+        ICookieManager cookieManager,
+        IOptions<JwtSettings> jwtSettings,
+        HttpContext httpContext,
         CancellationToken cancellationToken)
     {
+        var refreshToken = cookieManager.GetRefreshTokenFromCookie(httpContext);
+
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = "Refresh token not found"
+            });
+        }
+
+        var command = new RefreshTokenCommand(refreshToken);
         var result = await mediator.Send(command, cancellationToken);
 
         if (!result.IsSuccess)
         {
+            cookieManager.ClearAuthCookies(httpContext);
+
             return Results.BadRequest(new
             {
                 success = false,
@@ -67,10 +104,35 @@ public static class LoginEndpoints
             });
         }
 
+        cookieManager.SetAccessTokenCookie(
+            httpContext,
+            result.Value.AccessToken,
+            jwtSettings.Value.ExpirationMinutes
+        );
+
+        cookieManager.SetRefreshTokenCookie(
+            httpContext,
+            result.Value.RefreshToken,
+            jwtSettings.Value.RefreshTokenExpirationDays
+        );
+
         return Results.Ok(new
         {
             success = true,
-            data = result.Value
+            message = "Token refreshed successfully"
+        });
+    }
+
+    private static IResult Logout(
+        ICookieManager cookieManager,
+        HttpContext httpContext)
+    {
+        cookieManager.ClearAuthCookies(httpContext);
+
+        return Results.Ok(new
+        {
+            success = true,
+            message = "Logged out successfully"
         });
     }
 }

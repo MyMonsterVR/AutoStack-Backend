@@ -4,6 +4,7 @@ using AutoStack.Infrastructure;
 using AutoStack.Presentation;
 using AutoStack.Presentation.Endpoints.Login;
 using AutoStack.Presentation.Endpoints.User;
+using AutoStack.Presentation.Middleware;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
@@ -13,6 +14,17 @@ builder.Host.UseDefaultServiceProvider(options =>
 {
     options.ValidateScopes = true;
     options.ValidateOnBuild = true;
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
 
 builder.Services.AddPresentation();
@@ -37,6 +49,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
+
+app.UseCookieAuthentication();
 
 app.UseAuthentication();
 app.UseAuthorization();
