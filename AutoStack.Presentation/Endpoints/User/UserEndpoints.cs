@@ -11,7 +11,7 @@ public static class UserEndpoints
         var group = app.MapGroup("/api/users")
             .WithTags("Users");
 
-        group.MapPost("/", CreateUser)
+        group.MapPost("/register", CreateUser)
             .WithName("CreateUser")
             .WithSummary("Create User")
             .Produces(200)
@@ -43,7 +43,7 @@ public static class UserEndpoints
         return Results.Ok(new
         {
             success = true,
-            message = "User created successfully"
+            data    = result.Value
         });
     }
 

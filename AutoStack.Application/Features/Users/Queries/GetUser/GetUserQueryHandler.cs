@@ -1,13 +1,13 @@
-using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Interfaces.Queries;
 using AutoStack.Application.Common.Models;
+using AutoStack.Application.DTOs.Users;
 using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Users.Queries.GetUser;
 
-public class GetUserQueryHandler(IUserRepository userRepository) : IQueryHandler<GetUserQuery, UserRespones>
+public class GetUserQueryHandler(IUserRepository userRepository) : IQueryHandler<GetUserQuery, UserResponses>
 {
-    public async Task<Result<UserRespones>> Handle(GetUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserResponses>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByIdAsync(request.id, cancellationToken);
         if (user == null)
@@ -15,14 +15,12 @@ public class GetUserQueryHandler(IUserRepository userRepository) : IQueryHandler
             throw new InvalidOperationException($"User with id {request.id} was not found");
         }
 
-        var response = new UserRespones(
+        var response = new UserResponses(
             user.Id,
             user.Email,
-            user.Username,
-            user.CreatedAt,
-            user.UpdatedAt
+            user.Username
         );
 
-        return Result<UserRespones>.Success(response);
+        return Result<UserResponses>.Success(response);
     }
 }

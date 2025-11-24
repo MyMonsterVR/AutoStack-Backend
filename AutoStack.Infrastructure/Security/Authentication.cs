@@ -14,7 +14,7 @@ public class Authentication(IPasswordHasher passwordHasher, ApplicationDbContext
 
         if (user == null)
         {
-            throw new InvalidOperationException($"User with username {username} not found");
+            return null;
         }
 
         var isMatched = passwordHasher.VerifyPassword(password, user.PasswordHash);

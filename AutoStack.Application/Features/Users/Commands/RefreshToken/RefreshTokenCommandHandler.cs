@@ -1,27 +1,54 @@
-﻿using AutoStack.Application.Common.Interfaces.Commands;
+﻿using AutoStack.Application.Common.Interfaces;
+using AutoStack.Application.Common.Interfaces.Auth;
+using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
+using AutoStack.Application.DTOs.Login;
 using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Users.Commands.RefreshToken;
 
-public class RefreshTokenCommandHandler(IRefreshTokenRepository refreshTokenRepository) : ICommandHandler<RefreshTokenCommand, string>
+public class RefreshTokenCommandHandler(
+    IUserRepository userRepository,
+    IRefreshTokenRepository refreshTokenRepository,
+    IToken token,
+    IUnitOfWork unitOfWork)
+    : ICommandHandler<RefreshTokenCommand, LoginResponse>
 {
-    public async Task<Result<string>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LoginResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var requestTokenData = await refreshTokenRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);
-        if (requestTokenData == null)
+        var refreshTokenData = await refreshTokenRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);
+        if (refreshTokenData == null)
         {
-            return Result<string>.Failure("RefreshToken not found");
+            return Result<LoginResponse>.Failure("RefreshToken not found");
         }
         
-        DateTime expirationDateTime = DateTimeOffset.FromUnixTimeSeconds(requestTokenData.ExpiresAt).UtcDateTime;
+        var refreshTokenExpirationDateTime = DateTimeOffset.FromUnixTimeSeconds(refreshTokenData.ExpiresAt).UtcDateTime;
         
-        var isExpired = expirationDateTime < DateTime.UtcNow;
+        var isExpired = refreshTokenExpirationDateTime < DateTime.UtcNow;
         if (isExpired)
         {
-            return Result<string>.Failure("RefreshToken is expired");
+            return Result<LoginResponse>.Failure("RefreshToken has expired");
         }
         
-        return Result<string>.Success("RefreshToken has been refreshed");
+        var user = await userRepository.GetByIdAsync(refreshTokenData.UserId, cancellationToken);
+        if (user == null)
+        {
+            return Result<LoginResponse>.Failure("User not found");
+        }
+
+        var newAccessToken = token.GenerateAccessToken(user.Id, user.Username, user.Email);
+        var newRefreshToken = token.GenerateRefreshToken(user.Id);
+        
+        await refreshTokenRepository.DeleteAsync(refreshTokenData, cancellationToken);
+        await refreshTokenRepository.AddAsync(newRefreshToken, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        var response = new LoginResponse
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken.Token,
+        };
+        
+        return Result<LoginResponse>.Success(response);
     }
 }

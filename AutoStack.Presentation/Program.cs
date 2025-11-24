@@ -26,8 +26,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
-    {
-        // Oh, you wanted to use light mode? nah, that's not allowed in our docs
+    { 
         options.DarkMode = true;
         options.HideDarkModeToggle = true;
         options.Authentication = new ScalarAuthenticationOptions()

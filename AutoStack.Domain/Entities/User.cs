@@ -4,9 +4,9 @@ namespace AutoStack.Domain.Entities;
 
 public class User : Entity<Guid>
 {
-    public string Email { get; init; } = null!;
-    public string Username { get; init; } = null!;
-    public string PasswordHash { get; private set; } = null!;
+    public string Email { get; init; } = string.Empty;
+    public string Username { get; init; }  = string.Empty;
+    public string PasswordHash { get; set; }  = string.Empty;
     
     public User()
     {}
@@ -28,7 +28,7 @@ public class User : Entity<Guid>
         {
             throw new ArgumentException("Username cannot be null or empty", nameof(username));
         }
-        
+
         var user = new User(Guid.NewGuid(), email, username);
         return user;
     }

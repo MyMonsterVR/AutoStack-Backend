@@ -5,7 +5,7 @@ namespace AutoStack.Domain.Entities;
 
 public class RefreshToken : Entity<Guid>
 {
-    public string? Token { get; init; }
+    public string Token { get; init; } = String.Empty;
     public Guid UserId { get; init; }
 
     public int ExpiresAt  { get; init; }
@@ -39,16 +39,5 @@ public class RefreshToken : Entity<Guid>
         }
 
         return new RefreshToken(Guid.NewGuid(), token, userId, expiresAt);
-    }
-
-    public bool IsExpired()
-    {
-        var currentUnixTime = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-        return ExpiresAt <= currentUnixTime;
-    }
-
-    public DateTime GetExpirationDateTime()
-    {
-        return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(ExpiresAt);
     }
 }

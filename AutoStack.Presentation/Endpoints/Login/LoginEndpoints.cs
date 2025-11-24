@@ -19,8 +19,9 @@ public static class LoginEndpoints
             .Produces(200)
             .Produces(400);
         
-        group.MapPost("/refreshtoken", RefreshToken)
+        group.MapPost("/refresh", RefreshToken)
             .WithName("RefreshToken")
+            .WithSummary("Refresh token")
             .Produces(200)
             .Produces(400);
     }
@@ -69,6 +70,7 @@ public static class LoginEndpoints
         return Results.Ok(new
         {
             success = true,
+            data = result.Value
         });
     }
 }

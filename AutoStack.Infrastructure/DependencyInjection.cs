@@ -15,53 +15,54 @@ namespace AutoStack.Infrastructure;
 
 public static class DependencyInjection
 {
-    extension(IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        public void AddInfrastructure(IConfiguration configuration)
-        {
-            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
-            
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-            
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IPasswordHasher, PasswordHasher>();
-            services.AddScoped<IAuthentication, Authentication>();
-            services.AddScoped<IToken, Token>();
-        }
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+        
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IAuthentication, Authentication>();
+        services.AddScoped<IToken, Token>();
 
-        public void AddAuthorizationService(IConfiguration configuration)
-        {
-            var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+        return services;
+    }
 
-            if (jwtSettings == null)
-                throw new InvalidOperationException("JwtSettings configuration is missing");
+    public static IServiceCollection AddAuthorizationService(this IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
-            services.AddAuthorization()
-                .AddAuthentication(x =>
+        if (jwtSettings == null)
+            throw new InvalidOperationException("JwtSettings configuration is missing");
+
+        services.AddAuthorization()
+            .AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
                 {
-                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(x =>
-                {
-                    x.RequireHttpsMetadata = false;
-                    x.SaveToken = true;
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidateAudience = true,
-                        ValidAudience = jwtSettings.Audience,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
-        }
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+        
+        return services;
     }
 }

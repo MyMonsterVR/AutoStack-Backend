@@ -1,6 +1,7 @@
 ﻿using AutoStack.Domain.Entities;
 using AutoStack.Domain.Repositories;
 using AutoStack.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace AutoStack.Infrastructure.Repositories;
 
@@ -32,6 +33,18 @@ public class UserRepository(ApplicationDbContext dbContext) : IUserRepository
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await dbContext.Users.FindAsync([id], cancellationToken) != null;
+    }
+
+    public async Task<bool> EmailExists(string email, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Users
+            .AnyAsync(u => u.Email == email, cancellationToken);
+    }
+    
+    public async Task<bool> UsernameExists(string username, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Users
+            .AnyAsync(u => u.Username == username, cancellationToken);
     }
 
     public Task<int> CountStacksByUserId(Guid userId, CancellationToken cancellationToken = default)

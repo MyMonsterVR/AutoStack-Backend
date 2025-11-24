@@ -8,10 +8,20 @@ using AutoStack.Domain.Repositories;
 namespace AutoStack.Application.Features.Users.Commands.CreateUser;
 
 public class CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork)
-    : ICommandHandler<CreateUserCommand, int>
+    : ICommandHandler<CreateUserCommand, bool>
 {
-    public async Task<Result<int>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        if (await userRepository.EmailExists(request.Email.ToLower(), cancellationToken))
+        {
+            return Result<bool>.Failure("Email already exists");
+        }
+        
+        if (await userRepository.UsernameExists(request.Username.ToLower(), cancellationToken))
+        {
+            return Result<bool>.Failure("Username already exists");
+        }
+        
         var user = User.CreateUser(request.Email.ToLower(), request.Username.ToLower());
 
         var passwordHashed = passwordHasher.HashPassword(request.Password);
@@ -20,6 +30,6 @@ public class CreateUserCommandHandler(IUserRepository userRepository, IPasswordH
         await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<int>.Success(1);
+        return Result<bool>.Success(true);
     }
 }

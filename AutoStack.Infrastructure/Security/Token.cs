@@ -5,12 +5,13 @@ using System.Text;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Common.Models;
 using AutoStack.Domain.Entities;
+using AutoStack.Domain.Repositories;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AutoStack.Infrastructure.Security;
 
-public class Token(IOptions<JwtSettings> jwtSettings) : IToken
+public class Token(IOptions<JwtSettings> jwtSettings, IUserRepository userRepository) : IToken
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
