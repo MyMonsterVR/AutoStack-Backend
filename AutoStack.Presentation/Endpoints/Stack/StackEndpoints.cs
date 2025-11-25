@@ -1,4 +1,5 @@
 ﻿using AutoStack.Application.Features.Stacks.Commands.CreateStack;
+using AutoStack.Application.Features.Stacks.Queries.GetStacks;
 using MediatR;
 
 namespace AutoStack.Presentation.Endpoints.Stack;
@@ -14,6 +15,11 @@ public static class StackEndpoints
             .WithName("CreateStack")
             .WithSummary("Create a new Stack")
             .RequireAuthorization();
+        
+        group.MapGet("/getstacks", GetStacks)
+            .WithName("GetStacks")
+            .WithSummary("Get paginated stacks")
+            .WithTags("Stack");
     }
     
     private static async Task<IResult> CreateStack(
@@ -32,6 +38,31 @@ public static class StackEndpoints
 
         var commandWithUser = command with { UserId = authenticatedUserId };
         var result = await mediator.Send(commandWithUser, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors  = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data    = result.Value
+        });
+    }
+
+    private static async Task<IResult> GetStacks(
+        [AsParameters] GetStacksQuery query,
+        IMediator mediator,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await mediator.Send(query, cancellationToken);
 
         if (!result.IsSuccess)
         {
