@@ -22,7 +22,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         var configuration = new ConfigurationBuilder()
             .SetBasePath(presentationPath)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{environment}.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
             .Build();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
