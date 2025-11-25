@@ -1,7 +1,7 @@
 using AutoStack.Application.Features.Users.Commands.Login;
 using AutoStack.Application.Features.Users.Commands.RefreshToken;
+using AutoStack.Application.Features.Users.Commands.Register;
 using AutoStack.Infrastructure.Security;
-using AutoStack.Infrastructure.Security.Models;
 using MediatR;
 using Microsoft.Extensions.Options;
 
@@ -11,12 +11,18 @@ public static class LoginEndpoints
 {
     public static void MapLoginEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/login")
+        var group = app.MapGroup("/api/")
             .WithTags("Login");
 
-        group.MapPost("/", Login)
+        group.MapPost("/login", Login)
             .WithName("Login")
             .WithSummary("User login")
+            .Produces(200)
+            .Produces(400);
+        
+        group.MapPost("/register", Register)
+            .WithName("CreateUser")
+            .WithSummary("Create User")
             .Produces(200)
             .Produces(400);
 
@@ -68,9 +74,35 @@ public static class LoginEndpoints
         return Results.Ok(new
         {
             success = true,
-            message = "Login successful"
+            data = result.Value
         });
     }
+    
+    private static async Task<IResult> Register(
+        RegisterCommand command,
+        IMediator mediator,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await mediator.Send(command, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data    = result.Value
+        });
+    }
+
 
     private static async Task<IResult> RefreshToken(
         IMediator mediator,

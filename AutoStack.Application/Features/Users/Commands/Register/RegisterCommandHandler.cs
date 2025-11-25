@@ -5,12 +5,12 @@ using AutoStack.Application.Common.Models;
 using AutoStack.Domain.Entities;
 using AutoStack.Domain.Repositories;
 
-namespace AutoStack.Application.Features.Users.Commands.CreateUser;
+namespace AutoStack.Application.Features.Users.Commands.Register;
 
-public class CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork)
-    : ICommandHandler<CreateUserCommand, bool>
+public class RegisterCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork)
+    : ICommandHandler<RegisterCommand, bool>
 {
-    public async Task<Result<bool>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         if (await userRepository.EmailExists(request.Email.ToLower(), cancellationToken))
         {
@@ -20,6 +20,11 @@ public class CreateUserCommandHandler(IUserRepository userRepository, IPasswordH
         if (await userRepository.UsernameExists(request.Username.ToLower(), cancellationToken))
         {
             return Result<bool>.Failure("Username already exists");
+        }
+        
+        if (request.Password != request.ConfirmPassword)
+        {
+            return Result<bool>.Failure("Passwords do not match");
         }
         
         var user = User.CreateUser(request.Email.ToLower(), request.Username.ToLower());

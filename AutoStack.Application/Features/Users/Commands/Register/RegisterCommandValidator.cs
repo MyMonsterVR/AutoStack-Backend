@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace AutoStack.Application.Features.Users.Commands.CreateUser;
+namespace AutoStack.Application.Features.Users.Commands.Register;
 
-public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
-    public CreateUserCommandValidator()
+    public RegisterCommandValidator()
     {
         RuleFor(c => c.Email)
             .NotEmpty().WithMessage("Email is required.")
@@ -18,5 +18,9 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(c => c.Password)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(8).WithMessage("Password has to be minimum 8 characters long.");
+        
+        RuleFor(c => c.ConfirmPassword)
+            .NotEmpty().WithMessage("ConfirmPassword is required.")
+            .MinimumLength(8).WithMessage("ConfirmPassword has to be minimum 8 characters long.");
     }
 }
