@@ -17,20 +17,26 @@ public static class LoginEndpoints
         group.MapPost("/login", Login)
             .WithName("Login")
             .WithSummary("User login")
+            .RequireRateLimiting("login")
             .Produces(200)
-            .Produces(400);
-        
+            .Produces(400)
+            .Produces(429);
+
         group.MapPost("/register", Register)
             .WithName("CreateUser")
             .WithSummary("Create User")
+            .RequireRateLimiting("register")
             .Produces(200)
-            .Produces(400);
+            .Produces(400)
+            .Produces(429);
 
         group.MapPost("/refresh", RefreshToken)
             .WithName("RefreshToken")
             .WithSummary("Refresh token")
+            .RequireRateLimiting("refresh")
             .Produces(200)
-            .Produces(400);
+            .Produces(400)
+            .Produces(429);
 
         group.MapPost("/logout", Logout)
             .WithName("Logout")
