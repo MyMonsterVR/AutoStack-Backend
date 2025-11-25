@@ -5,7 +5,7 @@ using AutoStack.Application.Common.Models;
 using AutoStack.Application.DTOs.Login;
 using AutoStack.Domain.Repositories;
 
-namespace AutoStack.Application.Features.Users.Commands.RefreshToken;
+namespace AutoStack.Application.Features.Auth.Commands.RefreshToken;
 
 public class RefreshTokenCommandHandler(
     IUserRepository userRepository,

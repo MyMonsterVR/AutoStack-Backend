@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace AutoStack.Application.Features.Users.Commands.Register;
+namespace AutoStack.Application.Features.Auth.Commands.Register;
 
 public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {

@@ -5,7 +5,7 @@ using AutoStack.Application.Common.Models;
 using AutoStack.Domain.Entities;
 using AutoStack.Domain.Repositories;
 
-namespace AutoStack.Application.Features.Users.Commands.Register;
+namespace AutoStack.Application.Features.Auth.Commands.Register;
 
 public class RegisterCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork)
     : ICommandHandler<RegisterCommand, bool>

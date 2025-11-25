@@ -17,4 +17,12 @@
       <PackageReference Include="MediatR" Version="13.1.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Features\Auth\Commands\" />
+      <Folder Include="Features\Auth\Queries\" />
+      <Folder Include="Features\Stacks\Commands\" />
+      <Folder Include="Features\Stacks\Queries\" />
+      <Folder Include="Features\Users\Commands\" />
+    </ItemGroup>
+
 </Project>

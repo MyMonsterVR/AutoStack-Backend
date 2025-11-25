@@ -1,6 +1,6 @@
-using AutoStack.Application.Features.Users.Commands.Login;
-using AutoStack.Application.Features.Users.Commands.RefreshToken;
-using AutoStack.Application.Features.Users.Commands.Register;
+using AutoStack.Application.Features.Auth.Commands.Login;
+using AutoStack.Application.Features.Auth.Commands.RefreshToken;
+using AutoStack.Application.Features.Auth.Commands.Register;
 using AutoStack.Infrastructure.Security;
 using MediatR;
 using Microsoft.Extensions.Options;
@@ -98,7 +98,7 @@ public static class LoginEndpoints
             {
                 success = false,
                 message = result.Message,
-                errors = result.ValidationErrors
+                errors  = result.ValidationErrors
             });
         }
 

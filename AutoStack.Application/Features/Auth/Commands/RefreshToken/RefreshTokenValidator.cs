@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace AutoStack.Application.Features.Users.Commands.RefreshToken;
+namespace AutoStack.Application.Features.Auth.Commands.RefreshToken;
 
 public class RefreshTokenValidator : AbstractValidator<RefreshTokenCommand>
 {

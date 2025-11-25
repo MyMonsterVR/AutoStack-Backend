@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace AutoStack.Application.Features.Users.Commands.Login;
+namespace AutoStack.Application.Features.Auth.Commands.Login;
 
 public class LoginCommandValidator : AbstractValidator<LoginCommand>
 {

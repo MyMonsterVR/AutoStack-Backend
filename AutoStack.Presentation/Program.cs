@@ -4,6 +4,7 @@ using AutoStack.Application;
 using AutoStack.Infrastructure;
 using AutoStack.Presentation;
 using AutoStack.Presentation.Endpoints.Login;
+using AutoStack.Presentation.Endpoints.Stack;
 using AutoStack.Presentation.Endpoints.User;
 using AutoStack.Presentation.Middleware;
 using Microsoft.AspNetCore.RateLimiting;
@@ -92,6 +93,8 @@ builder.Services.AddAuthorizationService(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -121,5 +124,6 @@ app.UseAuthorization();
 
 app.MapUserEndpoints();
 app.MapLoginEndpoints();
+app.MapStackEndpoints();
 
 await app.RunAsync();

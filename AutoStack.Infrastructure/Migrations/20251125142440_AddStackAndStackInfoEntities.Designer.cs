@@ -3,6 +3,7 @@ using System;
 using AutoStack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoStack.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251125142440_AddStackAndStackInfoEntities")]
+    partial class AddStackAndStackInfoEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,45 +24,6 @@ namespace AutoStack.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("AutoStack.Domain.Entities.Package", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsVerified")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsVerified");
-
-                    b.HasIndex("Link")
-                        .IsUnique();
-
-                    b.HasIndex("Name");
-
-                    b.ToTable("Packages");
-                });
 
             modelBuilder.Entity("AutoStack.Domain.Entities.RefreshToken", b =>
                 {
@@ -149,8 +113,15 @@ namespace AutoStack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("PackageId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("PackageLink")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("PackageName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<Guid>("StackId")
                         .HasColumnType("uuid");
@@ -160,12 +131,7 @@ namespace AutoStack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PackageId");
-
                     b.HasIndex("StackId");
-
-                    b.HasIndex("StackId", "PackageId")
-                        .IsUnique();
 
                     b.ToTable("StackInfos");
                 });
@@ -221,26 +187,13 @@ namespace AutoStack.Infrastructure.Migrations
 
             modelBuilder.Entity("AutoStack.Domain.Entities.StackInfo", b =>
                 {
-                    b.HasOne("AutoStack.Domain.Entities.Package", "Package")
-                        .WithMany("StackInfos")
-                        .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("AutoStack.Domain.Entities.Stack", "Stack")
                         .WithMany("StackInfo")
                         .HasForeignKey("StackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Package");
-
                     b.Navigation("Stack");
-                });
-
-            modelBuilder.Entity("AutoStack.Domain.Entities.Package", b =>
-                {
-                    b.Navigation("StackInfos");
                 });
 
             modelBuilder.Entity("AutoStack.Domain.Entities.Stack", b =>
