@@ -33,7 +33,9 @@ public class CreateStackCommandValidator : AbstractValidator<CreateStackCommand>
                 item.RuleFor(x => x.Link)
                     .NotEmpty().WithMessage("Package link is required.")
                     .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
-                    .WithMessage("Package link must be a valid URL.");
+                    .WithMessage("Package link must be a valid URL.")
+                    .Must(link => link.StartsWith("https://www.npmjs.com/package/", StringComparison.OrdinalIgnoreCase))
+                    .WithMessage("Package link must be a valid npmjs.org package URL (e.g., https://www.npmjs.com/package/react)");
             });
     }
 }
