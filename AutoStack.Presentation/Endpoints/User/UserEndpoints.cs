@@ -19,8 +19,23 @@ public static class UserEndpoints
     private static async Task<IResult> GetUserById(
         Guid id,
         IMediator mediator,
+        HttpContext httpContext,
         CancellationToken cancellationToken)
     {
+        // Extract authenticated user's ID from JWT token
+        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        {
+            return Results.Unauthorized();
+        }
+
+        // Check if authenticated user is accessing their own data
+        if (authenticatedUserId != id)
+        {
+            return Results.Forbid();
+        }
+
         var query = new GetUserQuery(id);
         var result = await mediator.Send(query, cancellationToken);
 

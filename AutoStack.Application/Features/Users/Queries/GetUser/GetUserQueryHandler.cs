@@ -12,7 +12,7 @@ public class GetUserQueryHandler(IUserRepository userRepository) : IQueryHandler
         var user = await userRepository.GetByIdAsync(request.id, cancellationToken);
         if (user == null)
         {
-            throw new InvalidOperationException($"User with id {request.id} was not found");
+            return Result<UserResponses>.Failure("User not found");
         }
 
         var response = new UserResponses(
