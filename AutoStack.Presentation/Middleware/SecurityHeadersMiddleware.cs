@@ -4,6 +4,14 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context)
     {
+        // Skip security headers for OpenAPI/Scalar endpoints in development
+        if (context.Request.Path.StartsWithSegments("/scalar") ||
+            context.Request.Path.StartsWithSegments("/openapi"))
+        {
+            await next(context);
+            return;
+        }
+
         // Remove server information disclosure
         context.Response.Headers.Remove("Server");
         context.Response.Headers.Remove("X-Powered-By");
