@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace AutoStack.Application.DTOs.Stacks;
 
 /// <summary>
 /// Enum representing the type of technology stack
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum StackTypeResponse
 {
     /// <summary>

@@ -1,8 +1,11 @@
-﻿namespace AutoStack.Application.DTOs.Stacks;
+﻿using System.Text.Json.Serialization;
+
+namespace AutoStack.Application.DTOs.Stacks;
 
 /// <summary>
 /// Enum representing the field to sort stacks by
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum StackSortByResponse
 {
     /// <summary>

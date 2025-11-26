@@ -1,4 +1,6 @@
-﻿namespace AutoStack.Application.Common.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace AutoStack.Application.Common.Models;
 
 /// <summary>
 /// Represents a paginated response containing items and pagination metadata
@@ -29,15 +31,18 @@ public class PagedResponse<T>
     /// <summary>
     /// Gets the total number of pages
     /// </summary>
+    [JsonInclude]
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
 
     /// <summary>
     /// Gets whether there is a previous page available
     /// </summary>
+    [JsonInclude]
     public bool HasPreviousPage => PageNumber > 1;
 
     /// <summary>
     /// Gets whether there is a next page available
     /// </summary>
+    [JsonInclude]
     public bool HasNextPage => PageNumber < TotalPages;
 }

@@ -1,4 +1,6 @@
-﻿namespace AutoStack.Application.DTOs.Stacks;
+﻿using System.Text.Json.Serialization;
+
+namespace AutoStack.Application.DTOs.Stacks;
 
 /// <summary>
 /// Response DTO containing technology stack information with its packages
@@ -23,6 +25,7 @@ public class StackResponse
     /// <summary>
     /// Gets or sets the type of the stack
     /// </summary>
+    [JsonPropertyName("type")]
     public StackTypeResponse TypeResponse { get; set; }
 
     /// <summary>
@@ -33,5 +36,6 @@ public class StackResponse
     /// <summary>
     /// Gets or sets the list of packages included in the stack
     /// </summary>
-    public List<PackagesResponse> Packages { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<PackagesResponse>? Packages { get; set; }
 }

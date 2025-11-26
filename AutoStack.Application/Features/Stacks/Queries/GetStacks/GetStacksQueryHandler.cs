@@ -35,14 +35,9 @@ public class GetStacksQueryHandler(
             Name = s.Name,
             Description = s.Description,
             TypeResponse = Enum.Parse<StackTypeResponse>(s.Type),
-            Downloads = s.Downloads,
-            Packages = s.Packages.Select(si => new PackagesResponse(
-                si.Package.Name,
-                si.Package.Link,
-                si.Package.IsVerified
-            )).ToList()
+            Downloads = s.Downloads
         }).ToList();
-
+        
         var result = new PagedResponse<StackResponse>()
         {
             Items = stackResponses,
