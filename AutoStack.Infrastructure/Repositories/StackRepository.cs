@@ -15,7 +15,7 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
     public async Task<Stack?> GetByIdWithInfoAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await dbContext.Stacks
-            .Include(s => s.StackInfo)
+            .Include(s => s.Packages)
                 .ThenInclude(si => si.Package)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
@@ -23,7 +23,7 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
     public async Task<IEnumerable<Stack>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await dbContext.Stacks
-            .Include(s => s.StackInfo)
+            .Include(s => s.Packages)
                 .ThenInclude(si => si.Package)
             .Where(s => s.UserId == userId)
             .ToListAsync(cancellationToken);
@@ -32,7 +32,7 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
     public async Task<IEnumerable<Stack>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await dbContext.Stacks
-            .Include(s => s.StackInfo)
+            .Include(s => s.Packages)
                 .ThenInclude(si => si.Package)
             .ToListAsync(cancellationToken);
     }

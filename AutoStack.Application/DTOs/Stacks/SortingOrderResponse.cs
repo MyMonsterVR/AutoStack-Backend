@@ -3,7 +3,7 @@
 /// <summary>
 /// Enum representing the order direction for sorting
 /// </summary>
-public enum SortingOrder
+public enum SortingOrderResponse
 {
     /// <summary>
     /// Sort in ascending order (lowest to highest)

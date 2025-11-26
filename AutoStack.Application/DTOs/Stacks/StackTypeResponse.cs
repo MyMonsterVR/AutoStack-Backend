@@ -3,7 +3,7 @@ namespace AutoStack.Application.DTOs.Stacks;
 /// <summary>
 /// Enum representing the type of technology stack
 /// </summary>
-public enum StackType
+public enum StackTypeResponse
 {
     /// <summary>
     /// Frontend stack (e.g., UI frameworks and libraries)

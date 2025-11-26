@@ -3,7 +3,7 @@
 /// <summary>
 /// Enum representing the field to sort stacks by
 /// </summary>
-public enum StackSortBy
+public enum StackSortByResponse
 {
     /// <summary>
     /// Sort by popularity (number of downloads)

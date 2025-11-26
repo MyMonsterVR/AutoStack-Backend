@@ -35,16 +35,11 @@ public class StackConfiguration : IEntityTypeConfiguration<Stack>
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Relationship with StackInfo - configure backing field
-        builder.HasMany(x => x.StackInfo)
+        // Relationship with StackInfo
+        builder.HasMany(x => x.Packages)
             .WithOne(x => x.Stack)
             .HasForeignKey(x => x.StackId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // Tell EF Core to use the backing field
-        builder.Metadata
-            .FindNavigation(nameof(Stack.StackInfo))!
-            .SetPropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.Name);

@@ -19,7 +19,7 @@ public class GetStacksQueryHandler(
             query = query.Where(st => st.Type == request.StackType.Value.ToString());
         }
 
-        query = ApplySorting(query, request.StackSortBy, request.SortingOrder);
+        query = ApplySorting(query, request.StackSortByResponse, request.SortingOrderResponse);
 
         var stacks = query.ToList();
         var totalCount = stacks.Count();
@@ -34,9 +34,9 @@ public class GetStacksQueryHandler(
             Id = s.Id,
             Name = s.Name,
             Description = s.Description,
-            Type = Enum.Parse<StackType>(s.Type),
+            TypeResponse = Enum.Parse<StackTypeResponse>(s.Type),
             Downloads = s.Downloads,
-            StackInfo = s.StackInfo.Select(si => new StackInfoResponse(
+            Packages = s.Packages.Select(si => new PackagesResponse(
                 si.Package.Name,
                 si.Package.Link,
                 si.Package.IsVerified
@@ -54,15 +54,15 @@ public class GetStacksQueryHandler(
         return Result<PagedResponse<StackResponse>>.Success(result);
     }
 
-    private static IEnumerable<Stack> ApplySorting(IEnumerable<Stack> query, StackSortBy sortBy,
-        SortingOrder sortingOrder)
+    private static IEnumerable<Stack> ApplySorting(IEnumerable<Stack> query, StackSortByResponse sortByResponse,
+        SortingOrderResponse sortingOrderResponse)
     {
-        return sortBy switch
+        return sortByResponse switch
         {
-            StackSortBy.Popularity => sortingOrder == SortingOrder.Ascending
+            StackSortByResponse.Popularity => sortingOrderResponse == SortingOrderResponse.Ascending
                 ? query.OrderBy(s => s.Downloads)
                 : query.OrderByDescending(s => s.Downloads),
-            StackSortBy.PostedDate => sortingOrder == SortingOrder.Ascending
+            StackSortByResponse.PostedDate => sortingOrderResponse == SortingOrderResponse.Ascending
                 ? query.OrderBy(s => s.CreatedAt)
                 : query.OrderByDescending(s => s.CreatedAt),
             _ => query.OrderByDescending(s => s.Downloads)

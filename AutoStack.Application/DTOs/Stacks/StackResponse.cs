@@ -23,7 +23,7 @@ public class StackResponse
     /// <summary>
     /// Gets or sets the type of the stack
     /// </summary>
-    public StackType Type { get; set; }
+    public StackTypeResponse TypeResponse { get; set; }
 
     /// <summary>
     /// Gets or sets the number of times the stack has been downloaded
@@ -33,5 +33,5 @@ public class StackResponse
     /// <summary>
     /// Gets or sets the list of packages included in the stack
     /// </summary>
-    public List<StackInfoResponse> StackInfo { get; set; }
+    public List<PackagesResponse> Packages { get; set; }
 }

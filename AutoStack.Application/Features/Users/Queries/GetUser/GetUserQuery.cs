@@ -8,4 +8,4 @@ namespace AutoStack.Application.Features.Users.Queries.GetUser;
 /// Query to retrieve a user by their ID
 /// </summary>
 /// <param name="id">The ID of the user to retrieve</param>
-public record GetUserQuery(Guid id) : IQuery<UserResponses>;
+public record GetUserQuery(Guid id) : IQuery<UserResponse>;

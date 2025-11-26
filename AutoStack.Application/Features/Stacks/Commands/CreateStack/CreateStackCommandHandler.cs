@@ -33,7 +33,7 @@ public class CreateStackCommandHandler(
         var stack = Stack.Create(
             name: request.Name,
             description: request.Description,
-            type: request.Type.ToString(),
+            type: request.TypeResponse.ToString(),
             userId: request.UserId.Value
         );
 
@@ -77,8 +77,8 @@ public class CreateStackCommandHandler(
             return Result<StackResponse>.Failure("Failed to load created stack");
         }
 
-        var stackInfoResponse = loadedStack.StackInfo
-            .Select(si => new StackInfoResponse(si.Package.Name, si.Package.Link, si.Package.IsVerified))
+        var stackInfoResponse = loadedStack.Packages
+            .Select(si => new PackagesResponse(si.Package.Name, si.Package.Link, si.Package.IsVerified))
             .ToList();
 
         var response = new StackResponse
@@ -86,9 +86,9 @@ public class CreateStackCommandHandler(
             Id = stack.Id,
             Name = loadedStack.Name,
             Description = loadedStack.Description,
-            Type = request.Type,
+            TypeResponse = request.TypeResponse,
             Downloads = loadedStack.Downloads,
-            StackInfo = stackInfoResponse
+            Packages = stackInfoResponse
         };
 
         return Result<StackResponse>.Success(response);

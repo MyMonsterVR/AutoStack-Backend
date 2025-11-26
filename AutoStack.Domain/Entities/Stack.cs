@@ -34,8 +34,8 @@ public class Stack : Entity<Guid>
 
     // Navigation properties
     public User User { get; private set; } = null!;
-    private readonly List<StackInfo> _stackInfo = new();
-    public IReadOnlyCollection<StackInfo> StackInfo => _stackInfo.AsReadOnly();
+    private readonly List<StackInfo> _packages = new();
+    public IReadOnlyCollection<StackInfo> Packages => _packages.AsReadOnly();
 
     // Parameterless constructor for EF Core
     private Stack()
@@ -84,7 +84,7 @@ public class Stack : Entity<Guid>
         if (stackInfo == null)
             throw new ArgumentNullException(nameof(stackInfo));
 
-        _stackInfo.Add(stackInfo);
+        _packages.Add(stackInfo);
         UpdateTimestamp();
     }
 
