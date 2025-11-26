@@ -11,10 +11,17 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AutoStack.Infrastructure.Security;
 
-public class Token(IOptions<JwtSettings> jwtSettings, IUserRepository userRepository) : IToken
+public class Token(IOptions<JwtSettings> jwtSettings) : IToken
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
-
+    
+    /// <summary>
+    /// Generates a JWT access token for the user with their claims
+    /// </summary>
+    /// <param name="userId">The id of the user</param>
+    /// <param name="username">The username for the user</param>
+    /// <param name="email">The email of the user</param>
+    /// <returns>The JWT access token as a string</returns>
     public string GenerateAccessToken(Guid userId, string username, string email)
     {
         var claims = new[]
@@ -40,6 +47,11 @@ public class Token(IOptions<JwtSettings> jwtSettings, IUserRepository userReposi
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
+    /// <summary>
+    /// Generates a cryptographically secure refresh token for the user
+    /// </summary>
+    /// <param name="userId">The id of the user</param>
+    /// <returns>A RefreshToken object containing the token string, user id, and expiration</returns>
     public RefreshToken GenerateRefreshToken(Guid userId)
     {
         var randomNumber = new byte[64];
@@ -51,6 +63,11 @@ public class Token(IOptions<JwtSettings> jwtSettings, IUserRepository userReposi
         return RefreshToken.Create(token, userId, unixTimestamp);
     }
     
+    /// <summary>
+    /// Verifies a JWT token
+    /// </summary>
+    /// <param name="token">JWT token</param>
+    /// <returns>Principals from token; null if token is invalid</returns>
     public ClaimsPrincipal? VerifyToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();

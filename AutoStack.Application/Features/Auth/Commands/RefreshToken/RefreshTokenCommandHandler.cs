@@ -7,6 +7,9 @@ using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Auth.Commands.RefreshToken;
 
+/// <summary>
+/// Handles the refresh token command by validating the refresh token and generating new authentication tokens
+/// </summary>
 public class RefreshTokenCommandHandler(
     IUserRepository userRepository,
     IRefreshTokenRepository refreshTokenRepository,
@@ -14,6 +17,12 @@ public class RefreshTokenCommandHandler(
     IUnitOfWork unitOfWork)
     : ICommandHandler<RefreshTokenCommand, LoginResponse>
 {
+    /// <summary>
+    /// Processes the refresh token request by validating the token and returning new access and refresh tokens
+    /// </summary>
+    /// <param name="request">The refresh token command</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>A result containing new tokens on success, or an error message on failure</returns>
     public async Task<Result<LoginResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var refreshTokenData = await refreshTokenRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);

@@ -7,12 +7,21 @@ using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Stacks.Commands.CreateStack;
 
+/// <summary>
+/// Handles the create stack command by creating a new stack with its associated packages
+/// </summary>
 public class CreateStackCommandHandler(
     IStackRepository stackRepository,
     IPackageRepository packageRepository,
     IUnitOfWork unitOfWork)
     : ICommandHandler<CreateStackCommand, StackResponse>
 {
+    /// <summary>
+    /// Processes the create stack request by creating or reusing packages and linking them to the new stack
+    /// </summary>
+    /// <param name="request">The create stack command containing stack and package details</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>A result containing the created stack response on success, or an error message on failure</returns>
     public async Task<Result<StackResponse>> Handle(CreateStackCommand request, CancellationToken cancellationToken)
     {
         if (!request.UserId.HasValue)

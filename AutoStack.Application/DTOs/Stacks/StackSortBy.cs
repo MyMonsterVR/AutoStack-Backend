@@ -1,8 +1,22 @@
 ﻿namespace AutoStack.Application.DTOs.Stacks;
 
+/// <summary>
+/// Enum representing the field to sort stacks by
+/// </summary>
 public enum StackSortBy
 {
+    /// <summary>
+    /// Sort by popularity (number of downloads)
+    /// </summary>
     Popularity,
+
+    /// <summary>
+    /// Sort by rating
+    /// </summary>
     Rating,
+
+    /// <summary>
+    /// Sort by posted date
+    /// </summary>
     PostedDate,
 }

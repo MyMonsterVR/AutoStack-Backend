@@ -7,6 +7,9 @@ using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Auth.Commands.Login;
 
+/// <summary>
+/// Handles the login command by validating credentials and generating authentication tokens
+/// </summary>
 public class LoginCommandHandler(
     IAuthentication authentication,
     IUserRepository userRepository,
@@ -15,6 +18,12 @@ public class LoginCommandHandler(
     IUnitOfWork unitOfWork)
     : ICommandHandler<LoginCommand, LoginResponse>
 {
+    /// <summary>
+    /// Processes the login request by validating credentials and returning access and refresh tokens
+    /// </summary>
+    /// <param name="request">The login command containing username and password</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>A result containing the login response with tokens on success, or an error message on failure</returns>
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var userId = await authentication.ValidateAuthenticationAsync(request.Username.ToLower(), request.Password, cancellationToken);

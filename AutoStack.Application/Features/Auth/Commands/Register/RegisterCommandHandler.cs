@@ -7,9 +7,18 @@ using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Auth.Commands.Register;
 
+/// <summary>
+/// Handles the registration command by creating a new user account
+/// </summary>
 public class RegisterCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork)
     : ICommandHandler<RegisterCommand, bool>
 {
+    /// <summary>
+    /// Processes the registration request by validating the data and creating a new user
+    /// </summary>
+    /// <param name="request">The registration command containing user details</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>A result indicating success or failure with an error message</returns>
     public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         if (await userRepository.EmailExists(request.Email.ToLower(), cancellationToken))

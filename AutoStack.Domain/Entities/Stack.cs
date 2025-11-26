@@ -2,12 +2,34 @@
 
 namespace AutoStack.Domain.Entities;
 
+/// <summary>
+/// Represents a technology stack created by a user containing multiple packages
+/// </summary>
 public class Stack : Entity<Guid>
 {
+    /// <summary>
+    /// Gets the name of the stack
+    /// </summary>
     public string Name { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the description of the stack
+    /// </summary>
     public string Description { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the type of the stack (e.g., "frontend", "backend", "fullstack")
+    /// </summary>
     public string Type { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the number of times this stack has been downloaded
+    /// </summary>
     public int Downloads { get; private set; }
+
+    /// <summary>
+    /// Gets the ID of the user who created this stack
+    /// </summary>
     public Guid UserId { get; private set; }
 
     // Navigation properties
@@ -29,6 +51,15 @@ public class Stack : Entity<Guid>
         UserId = userId;
     }
 
+    /// <summary>
+    /// Creates a new stack with the specified properties
+    /// </summary>
+    /// <param name="name">The name of the stack</param>
+    /// <param name="description">The description of the stack</param>
+    /// <param name="type">The type of the stack</param>
+    /// <param name="userId">The ID of the user creating the stack</param>
+    /// <returns>A new Stack instance</returns>
+    /// <exception cref="ArgumentException">Thrown when any required parameter is null or empty</exception>
     public static Stack Create(string name, string description, string type, Guid userId)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -43,6 +74,11 @@ public class Stack : Entity<Guid>
         return new Stack(Guid.NewGuid(), name, description, type, userId);
     }
 
+    /// <summary>
+    /// Adds a StackInfo entry linking a package to this stack
+    /// </summary>
+    /// <param name="stackInfo">The StackInfo to add</param>
+    /// <exception cref="ArgumentNullException">Thrown when stackInfo is null</exception>
     public void AddStackInfo(StackInfo stackInfo)
     {
         if (stackInfo == null)
@@ -52,6 +88,9 @@ public class Stack : Entity<Guid>
         UpdateTimestamp();
     }
 
+    /// <summary>
+    /// Increments the download count for this stack and updates the timestamp
+    /// </summary>
     public void IncrementDownloads()
     {
         Downloads++;
