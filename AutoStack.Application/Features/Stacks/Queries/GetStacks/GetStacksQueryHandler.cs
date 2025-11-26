@@ -31,6 +31,7 @@ public class GetStacksQueryHandler(
 
         var stackResponses = stackPaginated.Select(s => new StackResponse
         {
+            Id = s.Id,
             Name = s.Name,
             Description = s.Description,
             Type = Enum.Parse<StackType>(s.Type),

@@ -83,6 +83,7 @@ public class CreateStackCommandHandler(
 
         var response = new StackResponse
         {
+            Id = stack.Id,
             Name = loadedStack.Name,
             Description = loadedStack.Description,
             Type = request.Type,

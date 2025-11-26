@@ -6,6 +6,11 @@
 public class StackResponse
 {
     /// <summary>
+    /// Gets or sets the id of the stack
+    /// </summary>
+    public Guid Id { get; set; }
+    
+    /// <summary>
     /// Gets or sets the name of the stack
     /// </summary>
     public string Name { get; set; }
