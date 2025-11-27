@@ -24,7 +24,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
     }
 
     [Fact]
-    public async Task Handle_WithValidCommand_ShouldCallRepositoryMethods()
+    public async Task Handle_WithValidCommand_ShouldCallRepositoryMethodsAndReturnSuccess()
     {
         var userId = Guid.NewGuid();
         var command = new CreateStackCommand(
@@ -47,8 +47,17 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         MockStackRepository.Setup(r => r.AddAsync(It.IsAny<Stack>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
+        var createdStack = new StackBuilder()
+            .WithName(command.Name)
+            .WithDescription(command.Description)
+            .Build();
+
         MockStackRepository.Setup(r => r.GetByIdWithInfoAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Stack?)null);
+            .ReturnsAsync(createdStack);
+
+        var createdUser = new UserBuilder().Build();
+        MockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(createdUser);
 
         MockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
@@ -69,8 +78,8 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
 
         MockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        result.IsSuccess.Should().BeFalse();
-        result.Message.Should().Be("Failed to load created stack");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
     }
 
     [Fact]
