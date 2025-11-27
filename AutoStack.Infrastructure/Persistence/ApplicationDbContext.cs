@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Stack> Stacks => Set<Stack>();
     public DbSet<StackInfo> StackInfos => Set<StackInfo>();
     public DbSet<Package> Packages => Set<Package>();
+    public DbSet<CliVersion> CliVersions => Set<CliVersion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
