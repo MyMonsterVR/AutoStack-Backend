@@ -59,7 +59,7 @@ public class GetStacksQueryHandler(
             StackSortByResponse.Popularity => sortingOrderResponse == SortingOrderResponse.Ascending
                 ? query.OrderBy(s => s.Downloads)
                 : query.OrderByDescending(s => s.Downloads),
-            StackSortByResponse.PostedDate => sortingOrderResponse == SortingOrderResponse.Ascending
+            StackSortByResponse.CreatedDate => sortingOrderResponse == SortingOrderResponse.Ascending
                 ? query.OrderBy(s => s.CreatedAt)
                 : query.OrderByDescending(s => s.CreatedAt),
             _ => query.OrderByDescending(s => s.Downloads)

@@ -19,7 +19,7 @@ public enum StackSortByResponse
     Rating,
 
     /// <summary>
-    /// Sort by posted date
+    /// Sort by created date
     /// </summary>
-    PostedDate,
+    CreatedDate,
 }
