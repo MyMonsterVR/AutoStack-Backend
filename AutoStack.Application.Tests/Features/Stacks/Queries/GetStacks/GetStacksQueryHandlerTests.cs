@@ -28,8 +28,14 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
             new StackBuilder().WithName("Stack 3").Build()
         };
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stacks);
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((stacks, stacks.Count));
 
         var query = new GetStacksQuery();
 
@@ -44,15 +50,20 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
     [Fact]
     public async Task Handle_WithStackTypeFilter_ShouldFilterByType()
     {
-        var stacks = new List<Stack>
+        var frontendStacks = new List<Stack>
         {
             new StackBuilder().WithName("React Stack").WithType("FRONTEND").Build(),
-            new StackBuilder().WithName("Node Stack").WithType("BACKEND").Build(),
             new StackBuilder().WithName("Vue Stack").WithType("FRONTEND").Build()
         };
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stacks);
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                "FRONTEND",
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((frontendStacks, 2));
 
         var query = new GetStacksQuery(StackType: StackTypeResponse.FRONTEND);
 
@@ -78,10 +89,17 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
         stack3.IncrementDownloads();
         stack3.IncrementDownloads();
 
-        var stacks = new List<Stack> { stack1, stack2, stack3 };
+        // Repository returns sorted ascending by downloads
+        var sortedStacks = new List<Stack> { stack1, stack3, stack2 };
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stacks);
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                "Popularity",
+                false, // ascending
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((sortedStacks, 3));
 
         var query = new GetStacksQuery(
             StackSortByResponse: StackSortByResponse.Popularity,
@@ -111,10 +129,17 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
         stack3.IncrementDownloads();
         stack3.IncrementDownloads();
 
-        var stacks = new List<Stack> { stack1, stack2, stack3 };
+        // Repository returns sorted descending by downloads
+        var sortedStacks = new List<Stack> { stack2, stack3, stack1 };
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stacks);
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                "Popularity",
+                true, // descending
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((sortedStacks, 3));
 
         var query = new GetStacksQuery(
             StackSortByResponse: StackSortByResponse.Popularity,
@@ -132,14 +157,20 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
     [Fact]
     public async Task Handle_WithPagination_ShouldReturnCorrectPage()
     {
-        var stacks = new List<Stack>();
-        for (int i = 1; i <= 25; i++)
+        var page2Stacks = new List<Stack>();
+        for (int i = 11; i <= 20; i++)
         {
-            stacks.Add(new StackBuilder().WithName($"Stack {i}").Build());
+            page2Stacks.Add(new StackBuilder().WithName($"Stack {i}").Build());
         }
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stacks);
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                2,
+                10,
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((page2Stacks, 25));
 
         var query = new GetStacksQuery(PageNumber: 2, PageSize: 10);
 
@@ -155,14 +186,20 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
     [Fact]
     public async Task Handle_ShouldCalculateTotalPages()
     {
-        var stacks = new List<Stack>();
-        for (int i = 1; i <= 25; i++)
+        var page1Stacks = new List<Stack>();
+        for (int i = 1; i <= 10; i++)
         {
-            stacks.Add(new StackBuilder().WithName($"Stack {i}").Build());
+            page1Stacks.Add(new StackBuilder().WithName($"Stack {i}").Build());
         }
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stacks);
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                1,
+                10,
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((page1Stacks, 25));
 
         var query = new GetStacksQuery(PageNumber: 1, PageSize: 10);
 
@@ -175,14 +212,20 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
     [Fact]
     public async Task Handle_WithLastPage_ShouldReturnRemainingItems()
     {
-        var stacks = new List<Stack>();
-        for (int i = 1; i <= 25; i++)
+        var page3Stacks = new List<Stack>();
+        for (int i = 21; i <= 25; i++)
         {
-            stacks.Add(new StackBuilder().WithName($"Stack {i}").Build());
+            page3Stacks.Add(new StackBuilder().WithName($"Stack {i}").Build());
         }
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stacks);
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                3,
+                10,
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((page3Stacks, 25));
 
         var query = new GetStacksQuery(PageNumber: 3, PageSize: 10);
 
@@ -202,8 +245,14 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
             .WithType("FRONTEND")
             .Build();
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Stack> { stack });
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((new List<Stack> { stack }, 1));
 
         var query = new GetStacksQuery();
 
@@ -221,8 +270,14 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
     [Fact]
     public async Task Handle_WithEmptyResult_ShouldReturnEmptyList()
     {
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Stack>());
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((new List<Stack>(), 0));
 
         var query = new GetStacksQuery();
 
@@ -236,18 +291,20 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
     [Fact]
     public async Task Handle_WithFilterAndPagination_ShouldApplyBoth()
     {
-        var stacks = new List<Stack>();
-        for (int i = 1; i <= 15; i++)
+        var page2FrontendStacks = new List<Stack>();
+        for (int i = 6; i <= 10; i++)
         {
-            stacks.Add(new StackBuilder().WithName($"Frontend {i}").WithType("FRONTEND").Build());
-        }
-        for (int i = 1; i <= 10; i++)
-        {
-            stacks.Add(new StackBuilder().WithName($"Backend {i}").WithType("BACKEND").Build());
+            page2FrontendStacks.Add(new StackBuilder().WithName($"Frontend {i}").WithType("FRONTEND").Build());
         }
 
-        MockStackRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(stacks);
+        MockStackRepository.Setup(r => r.GetStacksPagedAsync(
+                2,
+                5,
+                "FRONTEND",
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((page2FrontendStacks, 15));
 
         var query = new GetStacksQuery(
             StackType: StackTypeResponse.FRONTEND,

@@ -12,34 +12,30 @@ public class GetStacksQueryHandler(
 {
     public async Task<Result<PagedResponse<StackResponse>>> Handle(GetStacksQuery request, CancellationToken cancellationToken)
     {
-        var query = await stackRepository.GetAllAsync(cancellationToken);
+        var stackType = request.StackType?.ToString();
+        var sortBy = request.StackSortByResponse.ToString();
+        var sortDescending = request.SortingOrderResponse == SortingOrderResponse.Descending;
 
-        if (request.StackType.HasValue)
-        {
-            query = query.Where(st => st.Type == request.StackType.Value.ToString());
-        }
+        // Get paginated data from repository (database-level operation)
+        var (stacks, totalCount) = await stackRepository.GetStacksPagedAsync(
+            request.PageNumber,
+            request.PageSize,
+            stackType,
+            sortBy,
+            sortDescending,
+            cancellationToken);
 
-        query = ApplySorting(query, request.StackSortByResponse, request.SortingOrderResponse);
-
-        var stacks = query.ToList();
-        var totalCount = stacks.Count();
-
-        var stackPaginated = stacks
-            .Skip((request.PageNumber - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToList();
-
-        var stackResponses = stackPaginated.Select(s => new StackResponse
+        var stackResponses = stacks.Select(s => new StackResponse
         {
             Id = s.Id,
             Name = s.Name,
             Description = s.Description,
             TypeResponse = Enum.Parse<StackTypeResponse>(s.Type),
             Downloads = s.Downloads,
-            CreatedAt =  s.CreatedAt,
+            CreatedAt = s.CreatedAt,
             UserId = s.UserId
         }).ToList();
-        
+
         var result = new PagedResponse<StackResponse>
         {
             Items = stackResponses,
@@ -49,20 +45,5 @@ public class GetStacksQueryHandler(
         };
 
         return Result<PagedResponse<StackResponse>>.Success(result);
-    }
-
-    private static IEnumerable<Stack> ApplySorting(IEnumerable<Stack> query, StackSortByResponse sortByResponse,
-        SortingOrderResponse sortingOrderResponse)
-    {
-        return sortByResponse switch
-        {
-            StackSortByResponse.Popularity => sortingOrderResponse == SortingOrderResponse.Ascending
-                ? query.OrderBy(s => s.Downloads)
-                : query.OrderByDescending(s => s.Downloads),
-            StackSortByResponse.CreatedDate => sortingOrderResponse == SortingOrderResponse.Ascending
-                ? query.OrderBy(s => s.CreatedAt)
-                : query.OrderByDescending(s => s.CreatedAt),
-            _ => query.OrderByDescending(s => s.Downloads)
-        };
     }
 }

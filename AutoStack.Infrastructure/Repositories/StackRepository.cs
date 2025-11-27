@@ -59,4 +59,42 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
     {
         return await dbContext.Stacks.AnyAsync(s => s.Id == id, cancellationToken);
     }
+
+    public async Task<(IEnumerable<Stack> Stacks, int TotalCount)> GetStacksPagedAsync(
+        int pageNumber,
+        int pageSize,
+        string? stackType,
+        string sortBy,
+        bool sortDescending,
+        CancellationToken cancellationToken = default)
+    {
+        var query = dbContext.Stacks.AsQueryable();
+
+        if (!string.IsNullOrEmpty(stackType))
+        {
+            query = query.Where(s => s.Type == stackType);
+        }
+
+        query = sortBy.ToLowerInvariant() switch
+        {
+            "popularity" => sortDescending
+                ? query.OrderByDescending(s => s.Downloads)
+                : query.OrderBy(s => s.Downloads),
+            "createddate" => sortDescending
+                ? query.OrderByDescending(s => s.CreatedAt)
+                : query.OrderBy(s => s.CreatedAt),
+            _ => query.OrderByDescending(s => s.Downloads) // Default sort
+        };
+
+        // Get total count before pagination
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        // Apply pagination
+        var stacks = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (stacks, totalCount);
+    }
 }
