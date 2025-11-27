@@ -9,5 +9,6 @@ namespace AutoStack.Application.DTOs.Users;
 public record UserResponse(
     Guid Id,
     string Email,
-    string Username
+    string Username,
+    string AvatarUrl
 );

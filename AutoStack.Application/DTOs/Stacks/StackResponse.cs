@@ -38,4 +38,11 @@ public class StackResponse
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<PackagesResponse>? Packages { get; set; }
+    
+    // USER INFO
+    public Guid UserId { get; set; }
+
+    public string Username { get; set; } = string.Empty;
+    
+    public string? UserAvatarUrl { get; set; }
 }

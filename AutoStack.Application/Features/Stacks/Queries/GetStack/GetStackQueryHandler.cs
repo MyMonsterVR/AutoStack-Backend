@@ -6,7 +6,8 @@ using AutoStack.Domain.Repositories;
 namespace AutoStack.Application.Features.Stacks.Queries.GetStack;
 
 public class GetStackQueryHandler(
-    IStackRepository stackRepository
+    IStackRepository stackRepository,
+    IUserRepository userRepository
     ) : IQueryHandler<GetStackQuery, StackResponse>
 {
     public async Task<Result<StackResponse>> Handle(GetStackQuery request, CancellationToken cancellationToken)
@@ -16,6 +17,12 @@ public class GetStackQueryHandler(
         if (stack == null)
         {
             return Result<StackResponse>.Failure("No stack found");
+        }
+        
+        var user = await userRepository.GetByIdAsync(stack.UserId, cancellationToken);
+        if (user == null)
+        {
+            return Result<StackResponse>.Failure("No user found");
         }
         
         var stackResponse = new StackResponse()
@@ -30,6 +37,9 @@ public class GetStackQueryHandler(
                 si.Package.Link,
                 si.Package.IsVerified
             )).ToList(),
+            UserId = stack.UserId,
+            Username = user.Username,
+            UserAvatarUrl = user.AvatarUrl
         };
         
         return Result<StackResponse>.Success(stackResponse);

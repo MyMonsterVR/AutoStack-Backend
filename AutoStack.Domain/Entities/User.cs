@@ -1,11 +1,12 @@
-﻿using AutoStack.Domain.Common;
+﻿using System.Text.RegularExpressions;
+using AutoStack.Domain.Common;
 
 namespace AutoStack.Domain.Entities;
 
 /// <summary>
 /// Represents a user account in the system
 /// </summary>
-public class User : Entity<Guid>
+public partial class User : Entity<Guid>
 {
     /// <summary>
     /// Gets the user's email address
@@ -21,6 +22,11 @@ public class User : Entity<Guid>
     /// Gets or sets the hashed password for the user
     /// </summary>
     public string PasswordHash { get; set; }  = string.Empty;
+    
+    /// <summary>
+    /// Gets or sets the user's avatar url
+    /// </summary>
+    public string AvatarUrl  { get; set; }  = string.Empty;
     
     public User()
     {}
@@ -67,4 +73,44 @@ public class User : Entity<Guid>
         PasswordHash = passwordHash;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="avatarUrl">The url of the avatar</param>
+    /// <exception cref="ArgumentException">Thrown when avatar url is null or empty</exception>
+    public void SetAvatarUrl(string avatarUrl)
+    {
+        if (string.IsNullOrWhiteSpace(avatarUrl))
+        {
+            throw new ArgumentException("Avatar url cannot be null or empty", nameof(avatarUrl));
+        }
+
+        if (!IsValidUrl(avatarUrl))
+        {
+            throw new ArgumentException("Invalid avatar url", nameof(avatarUrl));
+        }
+        
+        AvatarUrl = avatarUrl;
+        UpdatedAt = DateTime.UtcNow;
+    }
+    
+    /// <summary>
+    /// Check if a url is in a valid url format (No special characters)
+    /// </summary>
+    /// <param name="url">The url of the user's avatar</param>
+    /// <returns>true if url is valid; else false</returns>
+    private static bool IsValidUrl(string url)
+    {
+        var regex = ValidUrlPattern();
+        return regex.IsMatch(url);
+    }
+
+    /*
+     to be fair, url will always be sat to our own domain,
+     but this regex opens up for the opportunity to have custom user urls,
+     as long as they don't include special characters
+    */
+    [GeneratedRegex(@"^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-DK")]
+    private static partial Regex ValidUrlPattern();
 }

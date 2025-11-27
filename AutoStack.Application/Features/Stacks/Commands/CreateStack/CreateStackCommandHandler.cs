@@ -12,6 +12,7 @@ namespace AutoStack.Application.Features.Stacks.Commands.CreateStack;
 /// </summary>
 public class CreateStackCommandHandler(
     IStackRepository stackRepository,
+    IUserRepository userRepository,
     IPackageRepository packageRepository,
     IUnitOfWork unitOfWork)
     : ICommandHandler<CreateStackCommand, StackResponse>
@@ -81,6 +82,12 @@ public class CreateStackCommandHandler(
             .Select(si => new PackagesResponse(si.Package.Name, si.Package.Link, si.Package.IsVerified))
             .ToList();
 
+        var user = await userRepository.GetByIdAsync(stack.UserId, cancellationToken);
+        if (user == null)
+        {
+            return Result<StackResponse>.Failure("No user found");
+        }
+        
         var response = new StackResponse
         {
             Id = stack.Id,
@@ -88,7 +95,10 @@ public class CreateStackCommandHandler(
             Description = loadedStack.Description,
             TypeResponse = request.TypeResponse,
             Downloads = loadedStack.Downloads,
-            Packages = stackInfoResponse
+            Packages = stackInfoResponse,
+            UserId =  loadedStack.UserId,
+            Username = user.Username,
+            UserAvatarUrl = user.AvatarUrl,
         };
 
         return Result<StackResponse>.Success(response);

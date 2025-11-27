@@ -27,7 +27,8 @@ public class GetUserQueryHandler(IUserRepository userRepository) : IQueryHandler
         var response = new UserResponse(
             user.Id,
             user.Email,
-            user.Username
+            user.Username,
+            user.AvatarUrl
         );
 
         return Result<UserResponse>.Success(response);

@@ -17,6 +17,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
     {
         _handler = new CreateStackCommandHandler(
             MockStackRepository.Object,
+            MockUserRepository.Object,
             MockPackageRepository.Object,
             MockUnitOfWork.Object
         );
@@ -131,6 +132,10 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         MockStackRepository.Setup(r => r.GetByIdWithInfoAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdStack);
 
+        var createdUser = new UserBuilder().Build();
+        MockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(createdUser);
+        
         MockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
@@ -168,6 +173,10 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         var createdStack = new StackBuilder().Build();
         MockStackRepository.Setup(r => r.GetByIdWithInfoAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdStack);
+
+        var createdUser = new UserBuilder().Build();
+        MockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(createdUser);
 
         MockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
@@ -209,6 +218,10 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         MockStackRepository.Setup(r => r.GetByIdWithInfoAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdStack);
 
+        var createdUser = new UserBuilder().Build();
+        MockUserRepository.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(createdUser);
+        
         MockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 

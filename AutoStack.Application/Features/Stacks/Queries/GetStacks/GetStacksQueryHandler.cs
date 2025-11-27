@@ -35,10 +35,11 @@ public class GetStacksQueryHandler(
             Name = s.Name,
             Description = s.Description,
             TypeResponse = Enum.Parse<StackTypeResponse>(s.Type),
-            Downloads = s.Downloads
+            Downloads = s.Downloads,
+            UserId = s.UserId
         }).ToList();
         
-        var result = new PagedResponse<StackResponse>()
+        var result = new PagedResponse<StackResponse>
         {
             Items = stackResponses,
             TotalCount = totalCount,
