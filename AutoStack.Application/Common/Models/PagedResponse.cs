@@ -11,7 +11,7 @@ public class PagedResponse<T>
     /// <summary>
     /// Gets or sets the items in the current page
     /// </summary>
-    public IEnumerable<T> Items { get; set; }
+    public IEnumerable<T> Items { get; set; } = new List<T>();
 
     /// <summary>
     /// Gets or sets the total number of items across all pages

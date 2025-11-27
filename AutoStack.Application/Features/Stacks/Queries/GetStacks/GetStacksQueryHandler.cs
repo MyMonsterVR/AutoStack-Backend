@@ -36,6 +36,7 @@ public class GetStacksQueryHandler(
             Description = s.Description,
             TypeResponse = Enum.Parse<StackTypeResponse>(s.Type),
             Downloads = s.Downloads,
+            CreatedAt =  s.CreatedAt,
             UserId = s.UserId
         }).ToList();
         

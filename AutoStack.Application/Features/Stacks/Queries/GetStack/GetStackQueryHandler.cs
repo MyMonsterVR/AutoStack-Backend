@@ -37,6 +37,7 @@ public class GetStackQueryHandler(
                 si.Package.Link,
                 si.Package.IsVerified
             )).ToList(),
+            CreatedAt = stack.CreatedAt,
             UserId = stack.UserId,
             Username = user.Username,
             UserAvatarUrl = user.AvatarUrl

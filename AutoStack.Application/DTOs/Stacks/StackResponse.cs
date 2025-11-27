@@ -11,16 +11,16 @@ public class StackResponse
     /// Gets or sets the id of the stack
     /// </summary>
     public Guid Id { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the name of the stack
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the description of the stack
     /// </summary>
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the type of the stack
@@ -38,6 +38,8 @@ public class StackResponse
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<PackagesResponse>? Packages { get; set; }
+    
+    public DateTime CreatedAt { get; set; }
     
     // USER INFO
     public Guid UserId { get; set; }
