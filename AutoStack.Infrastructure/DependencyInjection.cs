@@ -21,7 +21,29 @@ public static class DependencyInjection
         services.Configure<Security.Models.CookieSettings>(configuration.GetSection("CookieSettings"));
 
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        {
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), npgsqlOptions =>
+            {
+                // Enable connection pooling with reasonable limits
+                npgsqlOptions.MinBatchSize(1);
+                npgsqlOptions.MaxBatchSize(100);
+
+                // Set command timeout to 30 seconds (default is 30, but making it explicit)
+                npgsqlOptions.CommandTimeout(30);
+
+                // Enable retry on failure for transient errors
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorCodesToAdd: null);
+            });
+
+            // Enable sensitive data logging only in development
+            if (configuration.GetValue<string>("environment") == "development")
+            {
+                options.EnableSensitiveDataLogging();
+            }
+        });
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

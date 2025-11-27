@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using AutoStack.Application;
 using AutoStack.Infrastructure;
 using AutoStack.Presentation;
+using AutoStack.Presentation.Endpoints.Cli;
 using AutoStack.Presentation.Endpoints.Login;
 using AutoStack.Presentation.Endpoints.Stack;
 using AutoStack.Presentation.Endpoints.User;
@@ -125,5 +126,6 @@ app.UseAuthorization();
 app.MapUserEndpoints();
 app.MapLoginEndpoints();
 app.MapStackEndpoints();
+app.MapCliEndpoints();
 
 await app.RunAsync();

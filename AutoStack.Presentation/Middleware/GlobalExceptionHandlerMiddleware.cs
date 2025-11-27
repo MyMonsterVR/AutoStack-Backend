@@ -4,25 +4,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoStack.Presentation.Middleware;
 
-public class GlobalExceptionHandlerMiddleware : IExceptionHandler
+public class GlobalExceptionHandlerMiddleware(
+    ILogger<GlobalExceptionHandlerMiddleware> logger,
+    IHostEnvironment environment)
+    : IExceptionHandler
 {
-    private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
-    private readonly IHostEnvironment _environment;
-
-    public GlobalExceptionHandlerMiddleware(
-        ILogger<GlobalExceptionHandlerMiddleware> logger,
-        IHostEnvironment environment)
-    {
-        _logger = logger;
-        _environment = environment;
-    }
-
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
+        logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
         var (statusCode, message) = exception switch
         {
@@ -42,8 +34,8 @@ public class GlobalExceptionHandlerMiddleware : IExceptionHandler
         {
             success = false,
             message = message,
-            error = _environment.IsDevelopment() ? exception.Message : null as string,
-            stackTrace = _environment.IsDevelopment() ? exception.StackTrace : null as string
+            error = environment.IsDevelopment() ? exception.Message : null as string,
+            stackTrace = environment.IsDevelopment() ? exception.StackTrace : null as string
         };
 
         await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
