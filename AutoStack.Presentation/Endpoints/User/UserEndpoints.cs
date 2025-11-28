@@ -10,12 +10,50 @@ public static class UserEndpoints
         var group = app.MapGroup("/api/user")
             .WithTags("Users");
 
+        group.MapGet("/me", GetCurrentUser)
+            .WithName("GetCurrentUser")
+            .WithSummary("Get current authenticated user")
+            .RequireAuthorization();
+
         group.MapGet("/{id:guid}", GetUserById)
             .WithName("GetUserById")
             .WithSummary("Get User by Id")
             .RequireAuthorization();
     }
-    
+
+    private static async Task<IResult> GetCurrentUser(
+        IMediator mediator,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        // Extract authenticated user's ID from JWT token
+        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var query = new GetUserQuery(authenticatedUserId);
+        var result = await mediator.Send(query, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data = result.Value
+        });
+    }
+
     private static async Task<IResult> GetUserById(
         Guid id,
         IMediator mediator,
