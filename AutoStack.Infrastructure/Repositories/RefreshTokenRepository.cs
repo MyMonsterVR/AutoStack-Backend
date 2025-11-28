@@ -32,12 +32,15 @@ public class RefreshTokenRepository(ApplicationDbContext dbContext) : IRefreshTo
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.RefreshTokens.FindAsync([id], cancellationToken) != null;
+        return await dbContext.RefreshTokens
+            .AsNoTracking()
+            .AnyAsync(rt => rt.Id == id, cancellationToken);
     }
 
     public async Task<RefreshToken?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
         return await dbContext.RefreshTokens
+            .AsNoTracking()
             .FirstOrDefaultAsync(rt => rt.Token == refreshToken, cancellationToken);
     }
 }

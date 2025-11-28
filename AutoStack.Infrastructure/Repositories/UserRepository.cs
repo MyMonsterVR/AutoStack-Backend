@@ -32,18 +32,22 @@ public class UserRepository(ApplicationDbContext dbContext) : IUserRepository
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Users.FindAsync([id], cancellationToken) != null;
+        return await dbContext.Users
+            .AsNoTracking()
+            .AnyAsync(u => u.Id == id, cancellationToken);
     }
 
     public async Task<bool> EmailExists(string email, CancellationToken cancellationToken = default)
     {
         return await dbContext.Users
+            .AsNoTracking()
             .AnyAsync(u => u.Email == email, cancellationToken);
     }
-    
+
     public async Task<bool> UsernameExists(string username, CancellationToken cancellationToken = default)
     {
         return await dbContext.Users
+            .AsNoTracking()
             .AnyAsync(u => u.Username == username, cancellationToken);
     }
 
