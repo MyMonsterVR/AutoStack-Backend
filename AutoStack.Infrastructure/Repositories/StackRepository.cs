@@ -15,6 +15,8 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
     public async Task<Stack?> GetByIdWithInfoAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await dbContext.Stacks
+            .AsNoTracking()
+            .Include(s => s.User)
             .Include(s => s.Packages)
                 .ThenInclude(si => si.Package)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
@@ -23,6 +25,7 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
     public async Task<IEnumerable<Stack>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await dbContext.Stacks
+            .AsNoTracking()
             .Include(s => s.Packages)
                 .ThenInclude(si => si.Package)
             .Where(s => s.UserId == userId)
@@ -32,6 +35,7 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
     public async Task<IEnumerable<Stack>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await dbContext.Stacks
+            .AsNoTracking()
             .Include(s => s.Packages)
                 .ThenInclude(si => si.Package)
             .ToListAsync(cancellationToken);
@@ -57,7 +61,9 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Stacks.AnyAsync(s => s.Id == id, cancellationToken);
+        return await dbContext.Stacks
+            .AsNoTracking()
+            .AnyAsync(s => s.Id == id, cancellationToken);
     }
 
     public async Task<(IEnumerable<Stack> Stacks, int TotalCount)> GetStacksPagedAsync(
@@ -68,7 +74,9 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
         bool sortDescending,
         CancellationToken cancellationToken = default)
     {
-        var query = dbContext.Stacks.AsQueryable();
+        var query = dbContext.Stacks
+            .AsNoTracking()
+            .AsQueryable();
 
         if (!string.IsNullOrEmpty(stackType))
         {

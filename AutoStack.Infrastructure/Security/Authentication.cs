@@ -20,7 +20,9 @@ public class Authentication(IPasswordHasher passwordHasher, ApplicationDbContext
     /// <returns>User id; null if credentials are invalid</returns>
     public async Task<Guid?> ValidateAuthenticationAsync(string username, string password, CancellationToken cancellationToken)
     {
-        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username, cancellationToken);
+        var user = await dbContext.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Username == username, cancellationToken);
 
         // Use dummy hash if user doesn't exist, this prevents timing attacks
         var hashToVerify = user?.PasswordHash ?? _dummyHash.Value;

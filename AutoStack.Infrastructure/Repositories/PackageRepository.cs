@@ -15,12 +15,14 @@ public class PackageRepository(ApplicationDbContext dbContext) : IPackageReposit
     public async Task<Package?> GetByLinkAsync(string link, CancellationToken cancellationToken = default)
     {
         return await dbContext.Packages
+            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Link == link, cancellationToken);
     }
 
     public async Task<IEnumerable<Package>> GetVerifiedPackagesAsync(CancellationToken cancellationToken = default)
     {
         return await dbContext.Packages
+            .AsNoTracking()
             .Where(p => p.IsVerified)
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);
@@ -29,13 +31,16 @@ public class PackageRepository(ApplicationDbContext dbContext) : IPackageReposit
     public async Task<IEnumerable<Package>> GetAllPackagesAsync(CancellationToken cancellationToken = default)
     {
         return await dbContext.Packages
+            .AsNoTracking()
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<bool> ExistsByLinkAsync(string link, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Packages.AnyAsync(p => p.Link == link, cancellationToken);
+        return await dbContext.Packages
+            .AsNoTracking()
+            .AnyAsync(p => p.Link == link, cancellationToken);
     }
 
     public async Task AddAsync(Package aggregate, CancellationToken cancellationToken = default)
@@ -58,6 +63,8 @@ public class PackageRepository(ApplicationDbContext dbContext) : IPackageReposit
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Packages.AnyAsync(p => p.Id == id, cancellationToken);
+        return await dbContext.Packages
+            .AsNoTracking()
+            .AnyAsync(p => p.Id == id, cancellationToken);
     }
 }
