@@ -10,9 +10,9 @@ public class PasswordHasher : IPasswordHasher
 {
     private const int SaltSize = 16;
     private const int HashSize = 32;
-    private const int DegreeOfParallelism = 8;
-    private const int Iterations = 4;
-    private const int MemorySize = 1024 * 1024; 
+    private const int DegreeOfParallelism = 2;
+    private const int Iterations = 2;
+    private const int MemorySize = 128 * 1024;
     
     /// <summary>
     /// Hashes a password
