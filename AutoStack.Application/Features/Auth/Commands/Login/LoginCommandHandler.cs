@@ -8,16 +8,30 @@ using AutoStack.Domain.Repositories;
 namespace AutoStack.Application.Features.Auth.Commands.Login;
 
 /// <summary>
-/// Handles the login command by validating credentials and generating authentication tokens
+/// Handles the login command by validating credentials and generating _authentication tokens
 /// </summary>
-public class LoginCommandHandler(
-    IAuthentication authentication,
-    IUserRepository userRepository,
-    IRefreshTokenRepository refreshTokenRepository,
-    IToken token,
-    IUnitOfWork unitOfWork)
-    : ICommandHandler<LoginCommand, LoginResponse>
+public class LoginCommandHandler : ICommandHandler<LoginCommand, LoginResponse>
 {
+    private readonly IAuthentication _authentication;
+    private readonly IUserRepository _userRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IToken _token;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public LoginCommandHandler(
+        IAuthentication authentication,
+        IUserRepository userRepository,
+        IRefreshTokenRepository refreshTokenRepository,
+        IToken token,
+        IUnitOfWork unitOfWork)
+    {
+        _authentication = authentication;
+        _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
+        _token = token;
+        _unitOfWork = unitOfWork;
+    }
+
     /// <summary>
     /// Processes the login request by validating credentials and returning access and refresh tokens
     /// </summary>
@@ -26,24 +40,24 @@ public class LoginCommandHandler(
     /// <returns>A result containing the login response with tokens on success, or an error message on failure</returns>
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var userId = await authentication.ValidateAuthenticationAsync(request.Username.ToLower(), request.Password, cancellationToken);
+        var userId = await _authentication.ValidateAuthenticationAsync(request.Username.ToLower(), request.Password, cancellationToken);
 
         if (userId == null || userId.Value == Guid.Empty)
         {
             return Result<LoginResponse>.Failure("Invalid username or password");
         }
 
-        var user = await userRepository.GetByIdAsync(userId.Value, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(userId.Value, cancellationToken);
         if (user == null)
         {
             return Result<LoginResponse>.Failure("User not found");
         }
 
-        var generatedToken = token.GenerateAccessToken(userId.Value, user.Username, user.Email);
-        var userToken = token.GenerateRefreshToken(userId.Value);
+        var generatedToken = _token.GenerateAccessToken(userId.Value, user.Username, user.Email);
+        var userToken = _token.GenerateRefreshToken(userId.Value);
 
-        await refreshTokenRepository.AddAsync(userToken, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await _refreshTokenRepository.AddAsync(userToken, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var response = new LoginResponse
         {

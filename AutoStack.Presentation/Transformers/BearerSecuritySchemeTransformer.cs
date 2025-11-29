@@ -4,12 +4,18 @@ using Microsoft.OpenApi;
 
 namespace AutoStack.Presentation.Transformers;
 
-internal sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider)
-    : IOpenApiDocumentTransformer
+internal sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
 {
+    private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
+
+    public BearerSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider)
+    {
+        _authenticationSchemeProvider = authenticationSchemeProvider;
+    }
+
     public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
-        var authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();
+        var authenticationSchemes = await _authenticationSchemeProvider.GetAllSchemesAsync();
         if (authenticationSchemes.All(a => a.Name != "Bearer"))
             return;
 

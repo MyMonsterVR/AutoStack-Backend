@@ -10,13 +10,25 @@ namespace AutoStack.Application.Features.Stacks.Commands.CreateStack;
 /// <summary>
 /// Handles the create stack command by creating a new stack with its associated packages
 /// </summary>
-public class CreateStackCommandHandler(
-    IStackRepository stackRepository,
-    IUserRepository userRepository,
-    IPackageRepository packageRepository,
-    IUnitOfWork unitOfWork)
-    : ICommandHandler<CreateStackCommand, StackResponse>
+public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, StackResponse>
 {
+    private readonly IStackRepository _stackRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IPackageRepository _packageRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public CreateStackCommandHandler(
+        IStackRepository stackRepository,
+        IUserRepository userRepository,
+        IPackageRepository packageRepository,
+        IUnitOfWork unitOfWork)
+    {
+        _stackRepository = stackRepository;
+        _userRepository = userRepository;
+        _packageRepository = packageRepository;
+        _unitOfWork = unitOfWork;
+    }
+
     /// <summary>
     /// Processes the create stack request by creating or reusing packages and linking them to the new stack
     /// </summary>
@@ -48,7 +60,7 @@ public class CreateStackCommandHandler(
         foreach (var packageInput in uniquePackages)
         {
             // Check if package already exists by link
-            var existingPackage = await packageRepository.GetByLinkAsync(packageInput.Link, cancellationToken);
+            var existingPackage = await _packageRepository.GetByLinkAsync(packageInput.Link, cancellationToken);
 
             Package package;
             if (existingPackage != null)
@@ -60,7 +72,7 @@ public class CreateStackCommandHandler(
             {
                 // Create new custom package (unverified)
                 package = Package.Create(packageInput.Name, packageInput.Link, isVerified: false);
-                await packageRepository.AddAsync(package, cancellationToken);
+                await _packageRepository.AddAsync(package, cancellationToken);
             }
 
             // Link package to stack
@@ -68,11 +80,11 @@ public class CreateStackCommandHandler(
             stack.AddStackInfo(stackInfo);
         }
 
-        await stackRepository.AddAsync(stack, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await _stackRepository.AddAsync(stack, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Load the stack with packages for response
-        var loadedStack = await stackRepository.GetByIdWithInfoAsync(stack.Id, cancellationToken);
+        var loadedStack = await _stackRepository.GetByIdWithInfoAsync(stack.Id, cancellationToken);
         if (loadedStack == null)
         {
             return Result<StackResponse>.Failure("Failed to load created stack");
@@ -82,7 +94,7 @@ public class CreateStackCommandHandler(
             .Select(si => new PackagesResponse(si.Package.Name, si.Package.Link, si.Package.IsVerified))
             .ToList();
 
-        var user = await userRepository.GetByIdAsync(stack.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(stack.UserId, cancellationToken);
         if (user == null)
         {
             return Result<StackResponse>.Failure("No user found");

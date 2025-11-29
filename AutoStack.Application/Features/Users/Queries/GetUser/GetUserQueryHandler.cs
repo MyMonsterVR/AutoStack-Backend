@@ -8,8 +8,15 @@ namespace AutoStack.Application.Features.Users.Queries.GetUser;
 /// <summary>
 /// Handles the get user query by retrieving user information
 /// </summary>
-public class GetUserQueryHandler(IUserRepository userRepository) : IQueryHandler<GetUserQuery, UserResponse>
+public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserResponse>
 {
+    private readonly IUserRepository _userRepository;
+
+    public GetUserQueryHandler(IUserRepository userRepository)
+    {
+        _userRepository = userRepository;
+    }
+
     /// <summary>
     /// Processes the get user request by retrieving the user from the repository
     /// </summary>
@@ -18,7 +25,7 @@ public class GetUserQueryHandler(IUserRepository userRepository) : IQueryHandler
     /// <returns>A result containing the user response on success, or an error message on failure</returns>
     public async Task<Result<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByIdAsync(request.id, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(request.id, cancellationToken);
         if (user == null)
         {
             return Result<UserResponse>.Failure("User not found");

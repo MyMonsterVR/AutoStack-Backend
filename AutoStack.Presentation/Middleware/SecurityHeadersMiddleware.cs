@@ -1,14 +1,21 @@
 namespace AutoStack.Presentation.Middleware;
 
-public class SecurityHeadersMiddleware(RequestDelegate next)
+public class SecurityHeadersMiddleware
 {
+    private readonly RequestDelegate _next;
+
+    public SecurityHeadersMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
     public async Task InvokeAsync(HttpContext context)
     {
         // Skip security headers for OpenAPI/Scalar endpoints in development
         if (context.Request.Path.StartsWithSegments("/scalar") ||
             context.Request.Path.StartsWithSegments("/openapi"))
         {
-            await next(context);
+            await _next(context);
             return;
         }
 
@@ -43,7 +50,7 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
                 "max-age=31536000; includeSubDomains; preload");
         }
 
-        await next(context);
+        await _next(context);
     }
 }
 
