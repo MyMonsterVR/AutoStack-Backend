@@ -5,13 +5,18 @@ using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Stacks.Queries.GetStack;
 
-public class GetStackQueryHandler(
-    IStackRepository stackRepository
-    ) : IQueryHandler<GetStackQuery, StackResponse>
+public class GetStackQueryHandler : IQueryHandler<GetStackQuery, StackResponse>
 {
+    private readonly IStackRepository _stackRepository;
+
+    public GetStackQueryHandler(IStackRepository stackRepository)
+    {
+        _stackRepository = stackRepository;
+    }
+
     public async Task<Result<StackResponse>> Handle(GetStackQuery request, CancellationToken cancellationToken)
     {
-        var stack = await stackRepository.GetByIdWithInfoAsync(request.Id, cancellationToken);
+        var stack = await _stackRepository.GetByIdWithInfoAsync(request.Id, cancellationToken);
 
         if (stack == null)
         {

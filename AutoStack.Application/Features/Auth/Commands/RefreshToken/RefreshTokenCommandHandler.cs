@@ -10,13 +10,25 @@ namespace AutoStack.Application.Features.Auth.Commands.RefreshToken;
 /// <summary>
 /// Handles the refresh token command by validating the refresh token and generating new authentication tokens
 /// </summary>
-public class RefreshTokenCommandHandler(
-    IUserRepository userRepository,
-    IRefreshTokenRepository refreshTokenRepository,
-    IToken token,
-    IUnitOfWork unitOfWork)
-    : ICommandHandler<RefreshTokenCommand, LoginResponse>
+public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, LoginResponse>
 {
+    private readonly IUserRepository _userRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IToken _token;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public RefreshTokenCommandHandler(
+        IUserRepository userRepository,
+        IRefreshTokenRepository refreshTokenRepository,
+        IToken token,
+        IUnitOfWork unitOfWork)
+    {
+        _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
+        _token = token;
+        _unitOfWork = unitOfWork;
+    }
+
     /// <summary>
     /// Processes the refresh token request by validating the token and returning new access and refresh tokens
     /// </summary>
@@ -25,7 +37,7 @@ public class RefreshTokenCommandHandler(
     /// <returns>A result containing new tokens on success, or an error message on failure</returns>
     public async Task<Result<LoginResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var refreshTokenData = await refreshTokenRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);
+        var refreshTokenData = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);
         if (refreshTokenData == null)
         {
             return Result<LoginResponse>.Failure("RefreshToken not found");
@@ -39,18 +51,18 @@ public class RefreshTokenCommandHandler(
             return Result<LoginResponse>.Failure("RefreshToken has expired");
         }
         
-        var user = await userRepository.GetByIdAsync(refreshTokenData.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(refreshTokenData.UserId, cancellationToken);
         if (user == null)
         {
             return Result<LoginResponse>.Failure("User not found");
         }
 
-        var newAccessToken = token.GenerateAccessToken(user.Id, user.Username, user.Email);
-        var newRefreshToken = token.GenerateRefreshToken(user.Id);
+        var newAccessToken = _token.GenerateAccessToken(user.Id, user.Username, user.Email);
+        var newRefreshToken = _token.GenerateRefreshToken(user.Id);
         
-        await refreshTokenRepository.DeleteAsync(refreshTokenData, cancellationToken);
-        await refreshTokenRepository.AddAsync(newRefreshToken, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await _refreshTokenRepository.DeleteAsync(refreshTokenData, cancellationToken);
+        await _refreshTokenRepository.AddAsync(newRefreshToken, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         var response = new LoginResponse
         {

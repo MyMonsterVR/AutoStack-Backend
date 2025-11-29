@@ -6,10 +6,15 @@ using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Stacks.Queries.GetStacks;
 
-public class GetStacksQueryHandler(
-    IStackRepository stackRepository
-    ) : IQueryHandler<GetStacksQuery, PagedResponse<StackResponse>>
+public class GetStacksQueryHandler : IQueryHandler<GetStacksQuery, PagedResponse<StackResponse>>
 {
+    private readonly IStackRepository _stackRepository;
+
+    public GetStacksQueryHandler(IStackRepository stackRepository)
+    {
+        _stackRepository = stackRepository;
+    }
+
     public async Task<Result<PagedResponse<StackResponse>>> Handle(GetStacksQuery request, CancellationToken cancellationToken)
     {
         var stackType = request.StackType?.ToString();
@@ -17,7 +22,7 @@ public class GetStacksQueryHandler(
         var sortDescending = request.SortingOrderResponse == SortingOrderResponse.Descending;
 
         // Get paginated data from repository (database-level operation)
-        var (stacks, totalCount) = await stackRepository.GetStacksPagedAsync(
+        var (stacks, totalCount) = await _stackRepository.GetStacksPagedAsync(
             request.PageNumber,
             request.PageSize,
             stackType,

@@ -6,10 +6,19 @@ using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace AutoStack.Infrastructure.Security;
 
-public class Authentication(IPasswordHasher passwordHasher, ApplicationDbContext dbContext) : IAuthentication
+public class Authentication : IAuthentication
 {
-    private readonly Lazy<string> _dummyHash = new(() =>
-        passwordHasher.HashPassword("dummy_password_for_timing_attack_mitigation"));
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly ApplicationDbContext _dbContext;
+    private readonly Lazy<string> _dummyHash;
+
+    public Authentication(IPasswordHasher passwordHasher, ApplicationDbContext dbContext)
+    {
+        _passwordHasher = passwordHasher;
+        _dbContext = dbContext;
+        _dummyHash = new Lazy<string>(() =>
+            _passwordHasher.HashPassword("dummy_password_for_timing_attack_mitigation"));
+    }
 
     /// <summary>
     /// Validates the user's inputted credentials
@@ -20,13 +29,13 @@ public class Authentication(IPasswordHasher passwordHasher, ApplicationDbContext
     /// <returns>User id; null if credentials are invalid</returns>
     public async Task<Guid?> ValidateAuthenticationAsync(string username, string password, CancellationToken cancellationToken)
     {
-        var user = await dbContext.Users
+        var user = await _dbContext.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Username == username, cancellationToken);
 
         // Use dummy hash if user doesn't exist, this prevents timing attacks
         var hashToVerify = user?.PasswordHash ?? _dummyHash.Value;
-        var isMatched = passwordHasher.VerifyPassword(password, hashToVerify);
+        var isMatched = _passwordHasher.VerifyPassword(password, hashToVerify);
 
         // Return null if user not found OR password doesn't match
         if (user == null || !isMatched)

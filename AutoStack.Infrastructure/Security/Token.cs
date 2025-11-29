@@ -11,9 +11,14 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AutoStack.Infrastructure.Security;
 
-public class Token(IOptions<JwtSettings> jwtSettings) : IToken
+public class Token : IToken
 {
-    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
+    private readonly JwtSettings _jwtSettings;
+
+    public Token(IOptions<JwtSettings> jwtSettings)
+    {
+        _jwtSettings = jwtSettings.Value;
+    }
     
     /// <summary>
     /// Generates a JWT access token for the user with their claims
@@ -59,7 +64,7 @@ public class Token(IOptions<JwtSettings> jwtSettings) : IToken
         rng.GetBytes(randomNumber);
         var token = Convert.ToBase64String(randomNumber);
         
-        var unixTimestamp = (int)DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        var unixTimestamp = (int)DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays).Subtract(DateTime.UnixEpoch).TotalSeconds;
         return RefreshToken.Create(token, userId, unixTimestamp);
     }
     

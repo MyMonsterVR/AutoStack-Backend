@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AutoStack.Infrastructure;
@@ -43,6 +44,29 @@ public static class DependencyInjection
             {
                 options.EnableSensitiveDataLogging();
             }
+
+            // Log slow queries (over 1 second)
+            options.LogTo((eventId, level) => level >= LogLevel.Warning ||
+                         eventId.Name == "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted",
+                (eventData) =>
+                {
+                    switch (eventData)
+                    {
+                        case Microsoft.EntityFrameworkCore.Diagnostics.CommandExecutedEventData commandData:
+                        {
+                            if (commandData.Duration.TotalMilliseconds > 1000)
+                            {
+                                Console.WriteLine($"[SLOW QUERY] {commandData.Duration.TotalMilliseconds}ms: {commandData.Command.CommandText}");
+                            }
+
+                            break;
+                        }
+                        
+                        default:
+                            Console.WriteLine($"[ERROR] {eventData}");
+                            break;
+                    }
+                });
         });
 
         services.AddScoped<IUserRepository, UserRepository>();

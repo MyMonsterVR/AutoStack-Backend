@@ -13,11 +13,14 @@ public interface ICookieManager
     void ClearAuthCookies(HttpContext httpContext);
 }
 
-public class CookieManager(IOptions<CookieSettings> cookieSettings, IOptions<JwtSettings> jwtSettings)
-    : ICookieManager
+public class CookieManager : ICookieManager
 {
-    private readonly CookieSettings _cookieSettings = cookieSettings.Value;
-    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
+    private readonly CookieSettings _cookieSettings;
+
+    public CookieManager(IOptions<CookieSettings> cookieSettings, IOptions<JwtSettings> jwtSettings)
+    {
+        _cookieSettings = cookieSettings.Value;
+    }
 
     /// <summary>
     /// Force sets the access token to the cookie of a response

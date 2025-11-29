@@ -2,8 +2,15 @@ using AutoStack.Infrastructure.Security;
 
 namespace AutoStack.Presentation.Middleware;
 
-public class CookieAuthenticationMiddleware(RequestDelegate next)
+public class CookieAuthenticationMiddleware
 {
+    private readonly RequestDelegate _next;
+
+    public CookieAuthenticationMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
     public async Task InvokeAsync(HttpContext context, ICookieManager cookieManager)
     {
         if (!context.Request.Headers.ContainsKey("Authorization"))
@@ -16,7 +23,7 @@ public class CookieAuthenticationMiddleware(RequestDelegate next)
             }
         }
 
-        await next(context);
+        await _next(context);
     }
 }
 

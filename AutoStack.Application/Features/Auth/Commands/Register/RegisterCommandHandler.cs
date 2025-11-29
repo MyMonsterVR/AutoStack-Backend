@@ -10,9 +10,19 @@ namespace AutoStack.Application.Features.Auth.Commands.Register;
 /// <summary>
 /// Handles the registration command by creating a new user account
 /// </summary>
-public class RegisterCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork)
-    : ICommandHandler<RegisterCommand, bool>
+public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
 {
+    private readonly IUserRepository _userRepository;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public RegisterCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork)
+    {
+        _userRepository = userRepository;
+        _passwordHasher = passwordHasher;
+        _unitOfWork = unitOfWork;
+    }
+
     /// <summary>
     /// Processes the registration request by validating the data and creating a new user
     /// </summary>
@@ -21,12 +31,12 @@ public class RegisterCommandHandler(IUserRepository userRepository, IPasswordHas
     /// <returns>A result indicating success or failure with an error message</returns>
     public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        if (await userRepository.EmailExists(request.Email.ToLower(), cancellationToken))
+        if (await _userRepository.EmailExists(request.Email.ToLower(), cancellationToken))
         {
             return Result<bool>.Failure("Email already exists");
         }
         
-        if (await userRepository.UsernameExists(request.Username.ToLower(), cancellationToken))
+        if (await _userRepository.UsernameExists(request.Username.ToLower(), cancellationToken))
         {
             return Result<bool>.Failure("Username already exists");
         }
@@ -38,11 +48,11 @@ public class RegisterCommandHandler(IUserRepository userRepository, IPasswordHas
         
         var user = User.CreateUser(request.Email.ToLower(), request.Username.ToLower());
 
-        var passwordHashed = passwordHasher.HashPassword(request.Password);
+        var passwordHashed = _passwordHasher.HashPassword(request.Password);
         user.SetPassword(passwordHashed);
         
-        await userRepository.AddAsync(user, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await _userRepository.AddAsync(user, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Result<bool>.Success(true);
     }

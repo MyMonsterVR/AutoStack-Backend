@@ -5,16 +5,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoStack.Infrastructure.Repositories;
 
-public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
+public class StackRepository : IStackRepository
 {
+    private readonly ApplicationDbContext _dbContext;
+
+    public StackRepository(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
     public async Task<Stack?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Stacks.FindAsync([id], cancellationToken);
+        return await _dbContext.Stacks.FindAsync([id], cancellationToken);
     }
 
     public async Task<Stack?> GetByIdWithInfoAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Stacks
+        return await _dbContext.Stacks
             .AsNoTracking()
             .Include(s => s.User)
             .Include(s => s.Packages)
@@ -24,7 +31,7 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
 
     public async Task<IEnumerable<Stack>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Stacks
+        return await _dbContext.Stacks
             .AsNoTracking()
             .Include(s => s.Packages)
                 .ThenInclude(si => si.Package)
@@ -34,7 +41,7 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
 
     public async Task<IEnumerable<Stack>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await dbContext.Stacks
+        return await _dbContext.Stacks
             .AsNoTracking()
             .Include(s => s.Packages)
                 .ThenInclude(si => si.Package)
@@ -43,25 +50,25 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
 
     public async Task AddAsync(Stack aggregate, CancellationToken cancellationToken = default)
     {
-        await dbContext.Stacks.AddAsync(aggregate, cancellationToken);
+        await _dbContext.Stacks.AddAsync(aggregate, cancellationToken);
     }
 
     public Task UpdateAsync(Stack aggregate, CancellationToken cancellationToken = default)
     {
         aggregate.UpdateTimestamp();
-        dbContext.Stacks.Update(aggregate);
+        _dbContext.Stacks.Update(aggregate);
         return Task.CompletedTask;
     }
 
     public Task DeleteAsync(Stack aggregate, CancellationToken cancellationToken = default)
     {
-        dbContext.Stacks.Remove(aggregate);
+        _dbContext.Stacks.Remove(aggregate);
         return Task.CompletedTask;
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Stacks
+        return await _dbContext.Stacks
             .AsNoTracking()
             .AnyAsync(s => s.Id == id, cancellationToken);
     }
@@ -74,7 +81,7 @@ public class StackRepository(ApplicationDbContext dbContext) : IStackRepository
         bool sortDescending,
         CancellationToken cancellationToken = default)
     {
-        var query = dbContext.Stacks
+        var query = _dbContext.Stacks
             .AsNoTracking()
             .AsQueryable();
 
