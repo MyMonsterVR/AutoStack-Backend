@@ -92,7 +92,30 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAuthorizationService(builder.Configuration);
 
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddNpgSql(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
+        name: "postgres",
+        timeout: TimeSpan.FromSeconds(5),
+        tags: ["db", "ready"]);
+
 var app = builder.Build();
+
+// Simple request timing middleware
+app.Use(async (context, next) =>
+{
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    await next();
+    sw.Stop();
+
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("HTTP {Method} {Path} {StatusCode} in {ElapsedMs}ms",
+        context.Request.Method,
+        context.Request.Path,
+        context.Response.StatusCode,
+        sw.ElapsedMilliseconds);
+});
 
 app.UseExceptionHandler();
 
@@ -127,5 +150,16 @@ app.MapUserEndpoints();
 app.MapLoginEndpoints();
 app.MapStackEndpoints();
 app.MapCliEndpoints();
+
+// Health check endpoints
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = healthCheck => healthCheck.Tags.Contains("ready")
+});
+
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false // Liveness doesn't check dependencies
+});
 
 await app.RunAsync();
