@@ -2,7 +2,9 @@
 using AutoStack.Application.Features.Stacks.Commands.CreateStack;
 using AutoStack.Application.Features.Stacks.Queries.GetStack;
 using AutoStack.Application.Features.Stacks.Queries.GetStacks;
+using AutoStack.Application.Features.Stacks.Queries.VerifiedPackages;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AutoStack.Presentation.Endpoints.Stack;
 
@@ -25,6 +27,10 @@ public static class StackEndpoints
         group.MapGet("/getstack", GetStack)
             .WithName("GetStack")
             .WithSummary("Get specific stack");
+        
+        group.MapGet("/verifiedpackages", GetVerifiedPackages)
+            .WithName("Packages")
+            .WithSummary("Get packages");
     }
     
     private static async Task<IResult> CreateStack(
@@ -102,6 +108,25 @@ public static class StackEndpoints
                 message = result.Message,
                 errors = result.ValidationErrors
             });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data = result.Value
+        });
+    }
+
+    private static async Task<IResult> GetVerifiedPackages(
+        IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetPackagesQuery();
+        var result = await mediator.Send(query, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest();
         }
 
         return Results.Ok(new

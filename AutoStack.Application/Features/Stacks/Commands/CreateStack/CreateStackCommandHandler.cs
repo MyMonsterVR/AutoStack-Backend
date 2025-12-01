@@ -91,7 +91,7 @@ public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, Sta
         }
 
         var stackInfoResponse = loadedStack.Packages
-            .Select(si => new PackagesResponse(si.Package.Name, si.Package.Link, si.Package.IsVerified))
+            .Select(si => new PackageResponse(si.Package.Name, si.Package.Link, si.Package.IsVerified))
             .ToList();
 
         var user = await _userRepository.GetByIdAsync(stack.UserId, cancellationToken);
