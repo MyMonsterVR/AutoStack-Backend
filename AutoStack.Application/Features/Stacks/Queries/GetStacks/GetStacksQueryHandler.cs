@@ -18,8 +18,8 @@ public class GetStacksQueryHandler : IQueryHandler<GetStacksQuery, PagedResponse
     public async Task<Result<PagedResponse<StackResponse>>> Handle(GetStacksQuery request, CancellationToken cancellationToken)
     {
         var stackType = request.StackType?.ToString();
-        var sortBy = request.StackSortByResponse.ToString();
-        var sortDescending = request.SortingOrderResponse == SortingOrderResponse.Descending;
+        var sortBy = request.StackSortBy.ToString();
+        var sortDescending = request.SortingOrder == SortingOrderResponse.Descending;
 
         // Get paginated data from repository (database-level operation)
         var (stacks, totalCount) = await _stackRepository.GetStacksPagedAsync(
