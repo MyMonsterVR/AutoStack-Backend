@@ -121,7 +121,7 @@ public static class StackEndpoints
         IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var query = new GetPackagesQuery();
+        var query = new GetVerifiedPackagesQuery();
         var result = await mediator.Send(query, cancellationToken);
 
         if (!result.IsSuccess)

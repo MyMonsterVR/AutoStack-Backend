@@ -5,16 +5,16 @@ using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Stacks.Queries.VerifiedPackages;
 
-public class GetPackagesQueryHandler : IQueryHandler<GetPackagesQuery, List<PackageResponse>>
+public class GetVerifiedPackagesQueryHandler : IQueryHandler<GetVerifiedPackagesQuery, List<PackageResponse>>
 {
     private readonly IStackRepository _stackRepository;
     
-    public GetPackagesQueryHandler(IStackRepository stackRepository)
+    public GetVerifiedPackagesQueryHandler(IStackRepository stackRepository)
     {
         _stackRepository = stackRepository;
     }
     
-    public async Task<Result<List<PackageResponse>>> Handle(GetPackagesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<PackageResponse>>> Handle(GetVerifiedPackagesQuery request, CancellationToken cancellationToken)
     {
         var verifiedPackages = await _stackRepository.GetVerifiedPackagesAsync(cancellationToken);
 
