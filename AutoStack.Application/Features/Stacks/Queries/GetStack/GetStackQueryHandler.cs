@@ -34,7 +34,7 @@ public class GetStackQueryHandler : IQueryHandler<GetStackQuery, StackResponse>
             Name = stack.Name,
             Description = stack.Description,
             Downloads = stack.Downloads,
-            TypeResponse = Enum.Parse<StackTypeResponse>(stack.Type),
+            Type = Enum.Parse<StackTypeResponse>(stack.Type),
             Packages = stack.Packages.Select(si => new PackagesResponse(
                 si.Package.Name,
                 si.Package.Link,

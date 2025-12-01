@@ -16,7 +16,7 @@ public class CreateStackCommandValidator : AbstractValidator<CreateStackCommand>
             .MinimumLength(10).WithMessage("Description must be at least 10 characters long.")
             .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
 
-        RuleFor(c => c.TypeResponse)
+        RuleFor(c => c.Type)
             .IsInEnum().WithMessage("Invalid stack type.");
 
         RuleFor(c => c.Packages)

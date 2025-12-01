@@ -46,7 +46,7 @@ public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, Sta
         var stack = Stack.Create(
             name: request.Name,
             description: request.Description,
-            type: request.TypeResponse.ToString(),
+            type: request.Type.ToString(),
             userId: request.UserId.Value
         );
 
@@ -105,7 +105,7 @@ public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, Sta
             Id = stack.Id,
             Name = loadedStack.Name,
             Description = loadedStack.Description,
-            TypeResponse = request.TypeResponse,
+            Type = request.Type,
             Downloads = loadedStack.Downloads,
             Packages = stackInfoResponse,
             UserId =  loadedStack.UserId,

@@ -26,7 +26,7 @@ public class StackResponse
     /// Gets or sets the type of the stack
     /// </summary>
     [JsonPropertyName("type")]
-    public StackTypeResponse TypeResponse { get; set; }
+    public StackTypeResponse Type { get; set; }
 
     /// <summary>
     /// Gets or sets the number of times the stack has been downloaded

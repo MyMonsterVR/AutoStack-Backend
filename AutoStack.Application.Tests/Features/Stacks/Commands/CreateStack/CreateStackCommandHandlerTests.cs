@@ -30,7 +30,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -88,7 +88,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -117,7 +117,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -162,7 +162,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -204,7 +204,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react"),
@@ -248,7 +248,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -284,7 +284,7 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
