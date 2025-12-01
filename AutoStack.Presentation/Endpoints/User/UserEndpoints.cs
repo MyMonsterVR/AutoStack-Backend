@@ -1,4 +1,5 @@
-﻿using AutoStack.Application.Features.Users.Queries.GetUser;
+﻿using AutoStack.Application.Features.Users.Commands.EditUser;
+using AutoStack.Application.Features.Users.Queries.GetUser;
 using MediatR;
 
 namespace AutoStack.Presentation.Endpoints.User;
@@ -18,6 +19,11 @@ public static class UserEndpoints
         group.MapGet("/{id:guid}", GetUserById)
             .WithName("GetUserById")
             .WithSummary("Get User by Id")
+            .RequireAuthorization();
+        
+        group.MapPut("/edit", EditUser)
+            .WithName("EditUser")
+            .WithSummary("Edit User")
             .RequireAuthorization();
     }
 
@@ -92,5 +98,33 @@ public static class UserEndpoints
             success = true,
             data = result.Value
         });
+    }
+
+    private static async Task<IResult> EditUser(
+        EditUserCommand command,
+        IMediator mediator,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        {
+            return Results.Unauthorized();
+        }
+        
+        var result = await mediator.Send(command with { UserId = authenticatedUserId }, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+        
+        return Results.Ok(result.Value);
     }
 }

@@ -112,4 +112,15 @@ public class StackRepository : IStackRepository
 
         return (stacks, totalCount);
     }
+
+    public async Task<IEnumerable<Package>> GetVerifiedPackagesAsync(CancellationToken cancellationToken = default)
+    {
+        var packages = await _dbContext.Packages
+            .AsNoTracking()
+            .Where(p => p.IsVerified)
+            .AsQueryable()
+            .ToListAsync(cancellationToken);
+        
+        return packages;
+    }
 }

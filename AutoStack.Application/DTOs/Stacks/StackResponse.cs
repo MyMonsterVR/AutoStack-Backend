@@ -37,7 +37,7 @@ public class StackResponse
     /// Gets or sets the list of packages included in the stack
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<PackagesResponse>? Packages { get; set; }
+    public List<PackageResponse>? Packages { get; set; }
     
     public DateTime CreatedAt { get; set; }
     
