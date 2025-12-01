@@ -21,7 +21,6 @@
       <Folder Include="Features\Auth\Commands\" />
       <Folder Include="Features\Auth\Queries\" />
       <Folder Include="Features\Stacks\Commands\" />
-      <Folder Include="Features\Users\Commands\" />
     </ItemGroup>
 
 </Project>

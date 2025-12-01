@@ -11,12 +11,12 @@ public partial class User : Entity<Guid>
     /// <summary>
     /// Gets the user's email address
     /// </summary>
-    public string Email { get; init; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets the user's unique username
     /// </summary>
-    public string Username { get; init; }  = string.Empty;
+    public string Username { get; set; }  = string.Empty;
 
     /// <summary>
     /// Gets or sets the hashed password for the user
@@ -61,10 +61,42 @@ public partial class User : Entity<Guid>
     }
 
     /// <summary>
+    /// Sets the username for the user and updates the timestamp
+    /// </summary>
+    /// <param name="newUsername">The username of the user</param>
+    /// <exception cref="ArgumentException">Thrown when username is null or whitespace</exception>
+    public void SetUsername(string newUsername)
+    {
+        if (string.IsNullOrWhiteSpace(newUsername))
+        {
+            throw new ArgumentException("Username cannot be null or empty", nameof(newUsername));
+        }
+        
+        Username = newUsername;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Sets the email for the user and updates the timestamp
+    /// </summary>
+    /// <param name="email">The email of the user</param>
+    /// <exception cref="ArgumentException">Thrown when email is null or whitespace</exception>
+    public void SetEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new ArgumentException("Email cannot be null or empty", nameof(email));
+        }
+        
+        Email = email;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
     /// Sets the hashed password for the user and updates the timestamp
     /// </summary>
     /// <param name="passwordHash">The hashed password to set</param>
-    /// <exception cref="ArgumentException">Thrown when password hash is null or empty</exception>
+    /// <exception cref="ArgumentException">Thrown when password hash is null or whitespace</exception>
     public void SetPassword(string passwordHash)
     {
         if (string.IsNullOrWhiteSpace(passwordHash))
@@ -78,7 +110,7 @@ public partial class User : Entity<Guid>
     /// 
     /// </summary>
     /// <param name="avatarUrl">The url of the avatar</param>
-    /// <exception cref="ArgumentException">Thrown when avatar url is null or empty</exception>
+    /// <exception cref="ArgumentException">Thrown when avatar url is null or whitespace</exception>
     public void SetAvatarUrl(string avatarUrl)
     {
         if (string.IsNullOrWhiteSpace(avatarUrl))
