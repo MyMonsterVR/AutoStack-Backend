@@ -14,11 +14,11 @@ public class GetStacksQueryValidator : AbstractValidator<GetStacksQuery>
             .GreaterThanOrEqualTo(1)
             .WithMessage("PageSize must be at least 1");
 
-        RuleFor(x => x.StackSortByResponse)
+        RuleFor(x => x.StackSortBy)
             .IsInEnum()
             .WithMessage("StackSortBy must be one of: Popularity, Rating, PostedDate");
 
-        RuleFor(x => x.SortingOrderResponse)
+        RuleFor(x => x.SortingOrder)
             .IsInEnum()
             .WithMessage("SortingOrder must be either Ascending or Descending");
 

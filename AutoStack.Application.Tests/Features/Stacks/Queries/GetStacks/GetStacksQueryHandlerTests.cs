@@ -102,8 +102,8 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
             .ReturnsAsync((sortedStacks, 3));
 
         var query = new GetStacksQuery(
-            StackSortByResponse: StackSortByResponse.Popularity,
-            SortingOrderResponse: SortingOrderResponse.Ascending
+            StackSortBy: StackSortByResponse.Popularity,
+            SortingOrder: SortingOrderResponse.Ascending
         );
 
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -142,8 +142,8 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
             .ReturnsAsync((sortedStacks, 3));
 
         var query = new GetStacksQuery(
-            StackSortByResponse: StackSortByResponse.Popularity,
-            SortingOrderResponse: SortingOrderResponse.Descending
+            StackSortBy: StackSortByResponse.Popularity,
+            SortingOrder: SortingOrderResponse.Descending
         );
 
         var result = await _handler.Handle(query, CancellationToken.None);
