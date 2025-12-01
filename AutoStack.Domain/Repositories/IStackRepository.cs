@@ -48,10 +48,4 @@ public interface IStackRepository : IRepository<Stack, Guid>
         string sortBy,
         bool sortDescending,
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Gets all verified packages in the system
-    /// </summary>
-    /// <returns>A collection of all verified packages</returns>
-    Task<IEnumerable<Package>> GetVerifiedPackagesAsync(CancellationToken cancellationToken = default);
 }
