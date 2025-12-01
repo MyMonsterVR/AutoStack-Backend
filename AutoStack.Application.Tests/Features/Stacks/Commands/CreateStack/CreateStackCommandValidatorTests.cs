@@ -20,7 +20,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -38,7 +38,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "",
             Description: "Valid description here",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -57,7 +57,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "AB",
             Description: "Valid description here",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -76,7 +76,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: new string('A', 101),
             Description: "Valid description here",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -95,7 +95,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: "",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -114,7 +114,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: "Short",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -133,7 +133,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: new string('A', 501),
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -152,7 +152,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: "Valid description here",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>()
         );
 
@@ -168,7 +168,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: "Valid description here",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("", "https://www.npmjs.com/package/react")
@@ -187,7 +187,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: "Valid description here",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "")
@@ -206,7 +206,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: "Valid description here",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "not-a-valid-url")
@@ -225,7 +225,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: "Valid description here",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://github.com/facebook/react")
@@ -244,7 +244,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "React Stack",
             Description: "A modern React stack for building UIs",
-            TypeResponse: StackTypeResponse.FRONTEND,
+            Type: StackTypeResponse.FRONTEND,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react"),
@@ -267,7 +267,7 @@ public class CreateStackCommandValidatorTests
         var command = new CreateStackCommand(
             Name: "Valid Stack",
             Description: "Valid description here",
-            TypeResponse: stackType,
+            Type: stackType,
             Packages: new List<PackageInput>
             {
                 new("react", "https://www.npmjs.com/package/react")
@@ -276,6 +276,6 @@ public class CreateStackCommandValidatorTests
 
         var result = _validator.TestValidate(command);
 
-        result.ShouldNotHaveValidationErrorFor(c => c.TypeResponse);
+        result.ShouldNotHaveValidationErrorFor(c => c.Type);
     }
 }

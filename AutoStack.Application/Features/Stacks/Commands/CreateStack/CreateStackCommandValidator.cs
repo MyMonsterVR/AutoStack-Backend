@@ -16,7 +16,7 @@ public class CreateStackCommandValidator : AbstractValidator<CreateStackCommand>
             .MinimumLength(10).WithMessage("Description must be at least 10 characters long.")
             .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
 
-        RuleFor(c => c.TypeResponse)
+        RuleFor(c => c.Type)
             .IsInEnum().WithMessage("Invalid stack type.");
 
         RuleFor(c => c.Packages)
@@ -34,8 +34,14 @@ public class CreateStackCommandValidator : AbstractValidator<CreateStackCommand>
                     .NotEmpty().WithMessage("Package link is required.")
                     .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
                     .WithMessage("Package link must be a valid URL.")
-                    .Must(link => link.StartsWith("https://www.npmjs.com/package/", StringComparison.OrdinalIgnoreCase))
+                    .Must(IsValidPackageUrl)
                     .WithMessage("Package link must be a valid npmjs.org package URL (e.g., https://www.npmjs.com/package/react)");
             });
+    }
+    
+    private static bool IsValidPackageUrl(string link)
+    {
+        return link.StartsWith("https://www.npmjs.com/package/", StringComparison.OrdinalIgnoreCase) ||
+               link.StartsWith("https://npmjs.com/package/", StringComparison.OrdinalIgnoreCase);
     }
 }

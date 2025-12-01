@@ -71,7 +71,7 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Items.Should().HaveCount(2);
-        result.Value.Items.Should().AllSatisfy(s => s.TypeResponse.Should().Be(StackTypeResponse.FRONTEND));
+        result.Value.Items.Should().AllSatisfy(s => s.Type.Should().Be(StackTypeResponse.FRONTEND));
     }
 
     [Fact]
@@ -263,7 +263,7 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
         stackResponse.Id.Should().Be(stack.Id);
         stackResponse.Name.Should().Be(stack.Name);
         stackResponse.Description.Should().Be(stack.Description);
-        stackResponse.TypeResponse.Should().Be(StackTypeResponse.FRONTEND);
+        stackResponse.Type.Should().Be(StackTypeResponse.FRONTEND);
         stackResponse.Downloads.Should().Be(stack.Downloads);
     }
 
@@ -317,6 +317,6 @@ public class GetStacksQueryHandlerTests : QueryHandlerTestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Items.Should().HaveCount(5);
         result.Value.TotalCount.Should().Be(15);
-        result.Value.Items.Should().AllSatisfy(s => s.TypeResponse.Should().Be(StackTypeResponse.FRONTEND));
+        result.Value.Items.Should().AllSatisfy(s => s.Type.Should().Be(StackTypeResponse.FRONTEND));
     }
 }
