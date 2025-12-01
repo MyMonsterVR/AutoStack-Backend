@@ -102,21 +102,6 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-// Simple request timing middleware
-app.Use(async (context, next) =>
-{
-    var sw = System.Diagnostics.Stopwatch.StartNew();
-    await next();
-    sw.Stop();
-
-    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation("HTTP {Method} {Path} {StatusCode} in {ElapsedMs}ms",
-        context.Request.Method,
-        context.Request.Path,
-        context.Response.StatusCode,
-        sw.ElapsedMilliseconds);
-});
-
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
