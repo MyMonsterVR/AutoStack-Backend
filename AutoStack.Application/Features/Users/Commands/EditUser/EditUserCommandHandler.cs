@@ -12,11 +12,13 @@ public class EditUserCommandHandler : ICommandHandler<EditUserCommand, UserRespo
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public EditUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
+    public EditUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<UserResponse>> Handle(EditUserCommand request, CancellationToken cancellationToken)
@@ -57,7 +59,19 @@ public class EditUserCommandHandler : ICommandHandler<EditUserCommand, UserRespo
                 && !string.IsNullOrWhiteSpace(request.ConfirmNewPassword)
             )
             {
-                user.SetPassword(request.NewPassword);
+                var isPasswordValid = _passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash);
+                if (!isPasswordValid)
+                {
+                    return Result<UserResponse>.Failure("Current password is invalid");
+                }
+
+                if (request.NewPassword != request.ConfirmNewPassword)
+                {
+                    return  Result<UserResponse>.Failure("Passwords do not match");
+                }
+                
+                var newHashedPassword = _passwordHasher.HashPassword(request.NewPassword);
+                user.SetPassword(newHashedPassword);
             }
         
             await _userRepository.UpdateAsync(user, cancellationToken);
