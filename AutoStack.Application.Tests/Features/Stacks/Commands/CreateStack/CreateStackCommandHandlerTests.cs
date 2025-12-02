@@ -19,7 +19,8 @@ public class CreateStackCommandHandlerTests : CommandHandlerTestBase
             MockStackRepository.Object,
             MockUserRepository.Object,
             MockPackageRepository.Object,
-            MockUnitOfWork.Object
+            MockUnitOfWork.Object,
+            MockAuditLog.Object
         );
     }
 

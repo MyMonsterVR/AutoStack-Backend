@@ -14,6 +14,7 @@ public abstract class CommandHandlerTestBase : IDisposable
     protected Mock<IUserRepository> MockUserRepository { get; }
     protected Mock<IRefreshTokenRepository> MockRefreshTokenRepository { get; }
     protected Mock<IUnitOfWork> MockUnitOfWork { get; }
+    protected Mock<IAuditLogService> MockAuditLog { get; }
 
     protected CommandHandlerTestBase()
     {
@@ -22,6 +23,7 @@ public abstract class CommandHandlerTestBase : IDisposable
         MockUserRepository = new Mock<IUserRepository>();
         MockRefreshTokenRepository = new Mock<IRefreshTokenRepository>();
         MockUnitOfWork = new Mock<IUnitOfWork>();
+        MockAuditLog = new Mock<IAuditLogService>();
     }
 
     public void Dispose()
