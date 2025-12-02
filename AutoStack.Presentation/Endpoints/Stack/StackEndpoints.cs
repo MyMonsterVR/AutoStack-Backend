@@ -1,5 +1,6 @@
 ﻿using AutoStack.Application.Common.Models;
 using AutoStack.Application.Features.Stacks.Commands.CreateStack;
+using AutoStack.Application.Features.Stacks.Commands.DeleteStack;
 using AutoStack.Application.Features.Stacks.Queries.GetStack;
 using AutoStack.Application.Features.Stacks.Queries.GetStacks;
 using AutoStack.Application.Features.Stacks.Queries.MyStacks;
@@ -19,6 +20,11 @@ public static class StackEndpoints
         group.MapPost("/create", CreateStack)
             .WithName("CreateStack")
             .WithSummary("Create a new Stack")
+            .RequireAuthorization();
+
+        group.MapDelete("/deletestack", DeleteStack)
+            .WithName("DeleteStack")
+            .WithTags("Stack")
             .RequireAuthorization();
         
         group.MapGet("/getstacks", GetStacks)
@@ -96,6 +102,37 @@ public static class StackEndpoints
         {
             success = true,
             data    = result.Value
+        });
+    }
+
+    private static async Task<IResult> DeleteStack(
+        [FromBody] DeleteStackCommand command,
+        IMediator mediator,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        {
+            return Results.Unauthorized();
+        }
+        
+        var result = await mediator.Send(command with { UserId = authenticatedUserId }, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data = result.Value
         });
     }
 

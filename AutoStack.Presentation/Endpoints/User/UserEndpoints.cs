@@ -21,7 +21,7 @@ public static class UserEndpoints
             .WithSummary("Get User by Id")
             .RequireAuthorization();
         
-        group.MapPut("/edit", EditUser)
+        group.MapPatch("/edit", EditUser)
             .WithName("EditUser")
             .WithSummary("Edit User")
             .RequireAuthorization();
