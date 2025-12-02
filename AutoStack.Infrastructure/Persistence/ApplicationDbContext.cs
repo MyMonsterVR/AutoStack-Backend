@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<StackInfo> StackInfos => Set<StackInfo>();
     public DbSet<Package> Packages => Set<Package>();
     public DbSet<CliVersion> CliVersions => Set<CliVersion>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,4 +1,7 @@
 using System.Text.Json;
+using AutoStack.Application.Common.Interfaces;
+using AutoStack.Application.Common.Models;
+using AutoStack.Domain.Enums;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +18,29 @@ public class GlobalExceptionHandlerMiddleware(
         CancellationToken cancellationToken)
     {
         logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
+
+        // Database logging
+        try
+        {
+            var auditLogService = httpContext.RequestServices.GetService<IAuditLogService>();
+
+            if (auditLogService != null)
+            {
+                await auditLogService.LogAsync(new AuditLogRequest
+                {
+                    Level = Domain.Enums.LogLevel.Critical,
+                    Category = LogCategory.System,
+                    Message = $"Unhandled exception: {exception.Message}",
+                    Exception = exception,
+                    StatusCode = GetStatusCode(exception)
+                }, cancellationToken);
+            }
+        }
+        catch (Exception loggingEx)
+        {
+            // Never let logging failures crash the app
+            logger.LogError(loggingEx, "Failed to log exception to database");
+        }
 
         var (statusCode, message) = exception switch
         {
@@ -41,6 +67,17 @@ public class GlobalExceptionHandlerMiddleware(
         await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
 
         return true; // Exception handled
+    }
+
+    private static int GetStatusCode(Exception exception)
+    {
+        return exception switch
+        {
+            BadHttpRequestException => StatusCodes.Status400BadRequest,
+            JsonException => StatusCodes.Status400BadRequest,
+            DbUpdateException => StatusCodes.Status400BadRequest,
+            _ => StatusCodes.Status500InternalServerError
+        };
     }
 }
 

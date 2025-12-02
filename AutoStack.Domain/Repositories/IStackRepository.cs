@@ -25,13 +25,6 @@ public interface IStackRepository : IRepository<Stack, Guid>
     Task<IEnumerable<Stack>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets all stacks in the system
-    /// </summary>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>A collection of all stacks</returns>
-    Task<IEnumerable<Stack>> GetAllAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Gets a paginated collection of stacks with filtering and sorting
     /// </summary>
     /// <param name="pageNumber">The page number</param>
@@ -48,10 +41,4 @@ public interface IStackRepository : IRepository<Stack, Guid>
         string sortBy,
         bool sortDescending,
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Gets all verified packages in the system
-    /// </summary>
-    /// <returns>A collection of all verified packages</returns>
-    Task<IEnumerable<Package>> GetVerifiedPackagesAsync(CancellationToken cancellationToken = default);
 }

@@ -39,12 +39,24 @@ public class StackResponse
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<PackageResponse>? Packages { get; set; }
     
+    /// <summary>
+    /// Date the stack was created
+    /// </summary>
     public DateTime CreatedAt { get; set; }
     
     // USER INFO
+    /// <summary>
+    /// The id of the stack owner
+    /// </summary>
     public Guid UserId { get; set; }
 
+    /// <summary>
+    /// Stack owners username
+    /// </summary>
     public string Username { get; set; } = string.Empty;
     
+    /// <summary>
+    /// Stack owners avatar image link
+    /// </summary>
     public string? UserAvatarUrl { get; set; }
 }

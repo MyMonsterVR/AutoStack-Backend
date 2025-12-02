@@ -3,6 +3,7 @@ using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
 using AutoStack.Application.DTOs.Login;
+using AutoStack.Domain.Enums;
 using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Auth.Commands.Login;
@@ -17,19 +18,22 @@ public class LoginCommandHandler : ICommandHandler<LoginCommand, LoginResponse>
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IToken _token;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditLogService _auditLogService;
 
     public LoginCommandHandler(
         IAuthentication authentication,
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IToken token,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuditLogService auditLogService)
     {
         _authentication = authentication;
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _token = token;
         _unitOfWork = unitOfWork;
+        _auditLogService = auditLogService;
     }
 
     /// <summary>
@@ -44,6 +48,22 @@ public class LoginCommandHandler : ICommandHandler<LoginCommand, LoginResponse>
 
         if (userId == null || userId.Value == Guid.Empty)
         {
+            // Log failed login attempt (SECURITY EVENT)
+            try
+            {
+                await _auditLogService.LogAsync(new AuditLogRequest
+                {
+                    Level = LogLevel.Warning,
+                    Category = LogCategory.Security,
+                    Message = $"Failed login attempt for username: {request.Username}",
+                    UsernameOverride = request.Username
+                }, cancellationToken);
+            }
+            catch
+            {
+                // Ignore logging failures
+            }
+
             return Result<LoginResponse>.Failure("Invalid username or password");
         }
 
@@ -59,12 +79,29 @@ public class LoginCommandHandler : ICommandHandler<LoginCommand, LoginResponse>
         await _refreshTokenRepository.AddAsync(userToken, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // Log successful login (SECURITY EVENT)
+        try
+        {
+            await _auditLogService.LogAsync(new AuditLogRequest
+            {
+                Level = LogLevel.Information,
+                Category = LogCategory.Authentication,
+                Message = "User logged in successfully",
+                UserIdOverride = userId.Value,
+                UsernameOverride = user.Username
+            }, cancellationToken);
+        }
+        catch
+        {
+            // Ignore logging failures
+        }
+
         var response = new LoginResponse
         {
              AccessToken = generatedToken,
              RefreshToken = userToken.Token,
         };
-        
+
         return Result<LoginResponse>.Success(response);
     }
 }
