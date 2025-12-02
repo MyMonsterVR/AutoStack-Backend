@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AutoStack.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Entity Framework Core configuration for the Package entity
+/// </summary>
 public class PackageConfiguration : IEntityTypeConfiguration<Package>
 {
     public void Configure(EntityTypeBuilder<Package> builder)

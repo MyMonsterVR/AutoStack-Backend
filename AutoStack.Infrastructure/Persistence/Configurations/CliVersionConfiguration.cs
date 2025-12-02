@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AutoStack.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Entity Framework Core configuration for the CliVersion entity
+/// </summary>
 public class CliVersionConfiguration : IEntityTypeConfiguration<CliVersion>
 {
     public void Configure(EntityTypeBuilder<CliVersion> builder)

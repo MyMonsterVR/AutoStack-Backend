@@ -2,9 +2,11 @@
 using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Domain.Repositories;
+using AutoStack.Infrastructure.BackgroundServices;
 using AutoStack.Infrastructure.Persistence;
 using AutoStack.Infrastructure.Repositories;
 using AutoStack.Infrastructure.Security;
+using AutoStack.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
@@ -73,12 +75,17 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IStackRepository, StackRepository>();
         services.AddScoped<IPackageRepository, PackageRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IAuthentication, Authentication>();
         services.AddScoped<IToken, Token>();
         services.AddScoped<ICookieManager, CookieManager>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IAuditLogService, AuditLogService>();
+
+        services.AddHostedService<LogCleanupBackgroundService>();
 
         return services;
     }

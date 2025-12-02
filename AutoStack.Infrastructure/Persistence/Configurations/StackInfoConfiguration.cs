@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AutoStack.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Entity Framework Core configuration for the StackInfo entity
+/// </summary>
 public class StackInfoConfiguration : IEntityTypeConfiguration<StackInfo>
 {
     public void Configure(EntityTypeBuilder<StackInfo> builder)

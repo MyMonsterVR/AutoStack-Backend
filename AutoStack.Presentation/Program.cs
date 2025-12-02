@@ -63,6 +63,27 @@ builder.Services.AddRateLimiter(options =>
 
     options.OnRejected = async (context, cancellationToken) =>
     {
+        // Log rate limit exceeded
+        try
+        {
+            var auditLogService = context.HttpContext.RequestServices
+                .GetService<AutoStack.Application.Common.Interfaces.IAuditLogService>();
+
+            if (auditLogService != null)
+            {
+                await auditLogService.LogAsync(new AutoStack.Application.Common.Models.AuditLogRequest
+                {
+                    Level = AutoStack.Domain.Enums.LogLevel.Warning,
+                    Category = AutoStack.Domain.Enums.LogCategory.RateLimiting,
+                    Message = "Rate limit exceeded"
+                }, cancellationToken);
+            }
+        }
+        catch
+        {
+            // Ignore logging failures - don't let them block rate limiting response
+        }
+
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
         await context.HttpContext.Response.WriteAsJsonAsync(new
         {
@@ -129,6 +150,7 @@ app.UseCors("AllowFrontend");
 app.UseCookieAuthentication();
 
 app.UseAuthentication();
+app.UseHttpContextLogging();
 app.UseAuthorization();
 
 app.MapUserEndpoints();

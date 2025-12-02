@@ -1,3 +1,4 @@
+using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Features.Auth.Commands.Login;
 using AutoStack.Application.Tests.Builders;
@@ -14,19 +15,22 @@ public class LoginCommandHandlerTests : CommandHandlerTestBase
 {
     private readonly Mock<IAuthentication> _mockAuthentication;
     private readonly Mock<IToken> _mockToken;
+    private readonly Mock<IAuditLogService> _mockAuditLogService;
     private readonly LoginCommandHandler _handler;
 
     public LoginCommandHandlerTests()
     {
         _mockAuthentication = new Mock<IAuthentication>();
         _mockToken = new Mock<IToken>();
+        _mockAuditLogService = new Mock<IAuditLogService>();
 
         _handler = new LoginCommandHandler(
             _mockAuthentication.Object,
             MockUserRepository.Object,
             MockRefreshTokenRepository.Object,
             _mockToken.Object,
-            MockUnitOfWork.Object
+            MockUnitOfWork.Object,
+            _mockAuditLogService.Object
         );
     }
 
@@ -319,6 +323,6 @@ public class LoginCommandHandlerTests : CommandHandlerTestBase
     // Helper method
     private static int GetFutureUnixTime(int daysInFuture)
     {
-        return (int)DateTime.UtcNow.AddDays(daysInFuture).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        return (int)DateTime.UtcNow.AddDays(daysInFuture).Subtract(DateTime.UnixEpoch).TotalSeconds;
     }
 }
