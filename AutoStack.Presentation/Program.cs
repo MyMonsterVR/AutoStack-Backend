@@ -61,6 +61,39 @@ builder.Services.AddRateLimiter(options =>
         options.QueueLimit = 0;
     });
 
+    // Rate limiter for CLI download tracking - dynamic based on authentication
+    options.AddPolicy("cli-track", httpContext =>
+    {
+        var isAuthenticated = httpContext.User?.Identity?.IsAuthenticated ?? false;
+
+        if (isAuthenticated)
+        {
+            // Authenticated users get relaxed limits (50 per 5 minutes)
+            return RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 50,
+                    Window = TimeSpan.FromMinutes(5),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 0
+                });
+        }
+        else
+        {
+            // Unauthenticated users get strict IP-based limits (5 per 5 minutes)
+            return RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 5,
+                    Window = TimeSpan.FromMinutes(5),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 0
+                });
+        }
+    });
+
     options.OnRejected = async (context, cancellationToken) =>
     {
         // Log rate limit exceeded
@@ -152,6 +185,8 @@ app.UseCookieAuthentication();
 app.UseAuthentication();
 app.UseHttpContextLogging();
 app.UseAuthorization();
+
+app.UseCliIdentification();
 
 app.MapUserEndpoints();
 app.MapLoginEndpoints();
