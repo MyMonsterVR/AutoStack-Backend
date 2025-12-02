@@ -24,7 +24,7 @@ public static class StackEndpoints
 
         group.MapDelete("/deletestack", DeleteStack)
             .WithName("DeleteStack")
-            .WithTags("Stack")
+            .WithSummary("Delete a stack")
             .RequireAuthorization();
         
         group.MapGet("/getstacks", GetStacks)
@@ -42,7 +42,7 @@ public static class StackEndpoints
         
         group.MapGet("/mystacks", MyStacks)
             .WithName("MyStacks")
-            .WithSummary("Get all stacks")
+            .WithSummary("Get my stacks")
             .RequireAuthorization();
     }
     
