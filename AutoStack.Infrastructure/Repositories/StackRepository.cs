@@ -82,6 +82,7 @@ public class StackRepository : IStackRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Stacks
+            .Include(s => s.User)
             .AsNoTracking()
             .AsQueryable();
 

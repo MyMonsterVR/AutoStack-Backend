@@ -38,7 +38,9 @@ public class GetStacksQueryHandler : IQueryHandler<GetStacksQuery, PagedResponse
             Type = Enum.Parse<StackTypeResponse>(s.Type),
             Downloads = s.Downloads,
             CreatedAt = s.CreatedAt,
-            UserId = s.UserId
+            UserId = s.User.Id,
+            Username = s.User.Username,
+            UserAvatarUrl = s.User.AvatarUrl,
         }).ToList();
 
         var result = new PagedResponse<StackResponse>
