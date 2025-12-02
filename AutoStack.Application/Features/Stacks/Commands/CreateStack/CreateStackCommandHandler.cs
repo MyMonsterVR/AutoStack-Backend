@@ -3,6 +3,7 @@ using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
 using AutoStack.Application.DTOs.Stacks;
 using AutoStack.Domain.Entities;
+using AutoStack.Domain.Enums;
 using AutoStack.Domain.Repositories;
 
 namespace AutoStack.Application.Features.Stacks.Commands.CreateStack;
@@ -16,17 +17,20 @@ public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, Sta
     private readonly IUserRepository _userRepository;
     private readonly IPackageRepository _packageRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditLogService _auditLogService;
 
     public CreateStackCommandHandler(
         IStackRepository stackRepository,
         IUserRepository userRepository,
         IPackageRepository packageRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuditLogService auditLogService)
     {
         _stackRepository = stackRepository;
         _userRepository = userRepository;
         _packageRepository = packageRepository;
         _unitOfWork = unitOfWork;
+        _auditLogService = auditLogService;
     }
 
     /// <summary>
@@ -56,6 +60,10 @@ public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, Sta
             .Select(g => g.First())
             .ToList();
 
+        var newPackagesCount = 0;
+        var reusedPackagesCount = 0;
+        var packageNames = new List<string>();
+
         // Process each package: reuse existing or create new
         foreach (var packageInput in uniquePackages)
         {
@@ -67,13 +75,17 @@ public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, Sta
             {
                 // Reuse existing package
                 package = existingPackage;
+                reusedPackagesCount++;
             }
             else
             {
                 // Create new custom package (unverified)
                 package = Package.Create(packageInput.Name, packageInput.Link, isVerified: false);
                 await _packageRepository.AddAsync(package, cancellationToken);
+                newPackagesCount++;
             }
+
+            packageNames.Add(package.Name);
 
             // Link package to stack
             var stackInfo = StackInfo.Create(stack.Id, package.Id);
@@ -112,6 +124,35 @@ public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, Sta
             Username = user.Username,
             UserAvatarUrl = user.AvatarUrl,
         };
+
+        // Log stack creation
+        try
+        {
+            var additionalData = new Dictionary<string, object>
+            {
+                ["StackId"] = stack.Id,
+                ["StackName"] = stack.Name,
+                ["StackType"] = request.Type.ToString(),
+                ["TotalPackages"] = uniquePackages.Count,
+                ["NewPackages"] = newPackagesCount,
+                ["ReusedPackages"] = reusedPackagesCount,
+                ["Packages"] = packageNames
+            };
+
+            await _auditLogService.LogAsync(new AuditLogRequest
+            {
+                Level = LogLevel.Information,
+                Category = LogCategory.Stack,
+                Message = $"Stack '{stack.Name}' created with {uniquePackages.Count} package(s)",
+                UserIdOverride = stack.UserId,
+                UsernameOverride = user.Username,
+                AdditionalData = additionalData
+            }, cancellationToken);
+        }
+        catch
+        {
+            // Ignore logging failures
+        }
 
         return Result<StackResponse>.Success(response);
     }

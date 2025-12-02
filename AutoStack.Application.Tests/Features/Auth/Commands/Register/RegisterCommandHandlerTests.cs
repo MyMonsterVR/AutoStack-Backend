@@ -20,7 +20,8 @@ public class RegisterCommandHandlerTests : CommandHandlerTestBase
         _handler = new RegisterCommandHandler(
             MockUserRepository.Object,
             _mockPasswordHasher.Object,
-            MockUnitOfWork.Object
+            MockUnitOfWork.Object,
+            MockAuditLog.Object
         );
     }
 

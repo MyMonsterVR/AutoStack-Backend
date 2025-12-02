@@ -22,7 +22,8 @@ public class RefreshTokenCommandHandlerTests : CommandHandlerTestBase
             MockUserRepository.Object,
             MockRefreshTokenRepository.Object,
             _mockToken.Object,
-            MockUnitOfWork.Object
+            MockUnitOfWork.Object,
+            MockAuditLog.Object
         );
     }
 
@@ -326,19 +327,13 @@ public class RefreshTokenCommandHandlerTests : CommandHandlerTestBase
         MockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    // Helper methods
-    private static int GetCurrentUnixTime()
-    {
-        return (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-    }
-
     private static int GetFutureUnixTime(int daysInFuture)
     {
-        return (int)DateTime.UtcNow.AddDays(daysInFuture).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        return (int)DateTime.UtcNow.AddDays(daysInFuture).Subtract(DateTime.UnixEpoch).TotalSeconds;
     }
 
     private static int GetPastUnixTime(int daysInPast)
     {
-        return (int)DateTime.UtcNow.AddDays(-daysInPast).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        return (int)DateTime.UtcNow.AddDays(-daysInPast).Subtract(DateTime.UnixEpoch).TotalSeconds;
     }
 }
