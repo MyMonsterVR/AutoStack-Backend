@@ -177,7 +177,9 @@ app.UseHttpsRedirection();
 
 // Configure static file serving for uploaded avatars
 var uploadsPath = builder.Configuration["FileStorage:AvatarPath"] ?? "uploads/avatars";
-var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), uploadsPath);
+var uploadDirectory = Path.IsPathRooted(uploadsPath)
+    ? uploadsPath
+    : Path.Combine(Directory.GetCurrentDirectory(), uploadsPath);
 
 if (!Directory.Exists(uploadDirectory))
 {
