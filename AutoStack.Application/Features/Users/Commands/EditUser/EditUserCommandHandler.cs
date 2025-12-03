@@ -59,14 +59,6 @@ public class EditUserCommandHandler : ICommandHandler<EditUserCommand, UserRespo
                 changedFields.Add("Email");
             }
 
-            if (user.AvatarUrl != request.AvatarUrl)
-            {
-                additionalData["OldAvatarUrl"] = user.AvatarUrl ?? "null";
-                additionalData["NewAvatarUrl"] = request.AvatarUrl ?? "null";
-                user.SetAvatarUrl(request.AvatarUrl);
-                changedFields.Add("AvatarUrl");
-            }
-
             if (
                 !string.IsNullOrWhiteSpace(request.CurrentPassword)
                 && !string.IsNullOrWhiteSpace(request.NewPassword)

@@ -9,6 +9,7 @@ using AutoStack.Presentation.Endpoints.Stack;
 using AutoStack.Presentation.Endpoints.User;
 using AutoStack.Presentation.Middleware;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
@@ -173,6 +174,26 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Configure static file serving for uploaded avatars
+var uploadsPath = builder.Configuration["FileStorage:AvatarPath"] ?? "uploads/avatars";
+var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), uploadsPath);
+
+if (!Directory.Exists(uploadDirectory))
+{
+    Directory.CreateDirectory(uploadDirectory);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadDirectory),
+    RequestPath = "/uploads/avatars",
+    OnPrepareResponse = ctx =>
+    {
+        // Cache avatars for 7 days
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=604800");
+    }
+});
 
 app.UseSecurityHeaders();
 

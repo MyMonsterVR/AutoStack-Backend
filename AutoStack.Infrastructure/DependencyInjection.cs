@@ -3,6 +3,7 @@ using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Domain.Repositories;
 using AutoStack.Infrastructure.BackgroundServices;
+using AutoStack.Infrastructure.Options;
 using AutoStack.Infrastructure.Persistence;
 using AutoStack.Infrastructure.Repositories;
 using AutoStack.Infrastructure.Security;
@@ -22,6 +23,7 @@ public static class DependencyInjection
     {
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<Security.Models.CookieSettings>(configuration.GetSection("CookieSettings"));
+        services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -84,6 +86,7 @@ public static class DependencyInjection
         services.AddScoped<ICookieManager, CookieManager>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
         services.AddHostedService<LogCleanupBackgroundService>();
 

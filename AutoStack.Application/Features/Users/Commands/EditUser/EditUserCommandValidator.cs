@@ -22,8 +22,5 @@ public class EditUserCommandValidator : AbstractValidator<EditUserCommand>
         RuleFor(c => c.ConfirmNewPassword)
             .NotEmpty().WithMessage("Confirm password is required.")
             .When(c => !string.IsNullOrWhiteSpace(c.NewPassword));
-
-        RuleFor(c => c.AvatarUrl)
-            .NotEmpty().WithMessage("AvatarUrl is required.");
     }
 }
