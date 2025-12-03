@@ -1,6 +1,7 @@
 ﻿using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Models;
 using AutoStack.Application.Features.Users.Commands.EditUser;
+using AutoStack.Application.Features.Users.Commands.UploadAvatar;
 using AutoStack.Application.Features.Users.Queries.GetUser;
 using AutoStack.Domain.Enums;
 using MediatR;
@@ -28,6 +29,13 @@ public static class UserEndpoints
             .WithName("EditUser")
             .WithSummary("Edit User")
             .RequireAuthorization();
+
+        group.MapPost("/avatar", UploadAvatar)
+            .WithName("UploadAvatar")
+            .WithSummary("Upload user avatar")
+            .RequireAuthorization()
+            .DisableAntiforgery()
+            .Accepts<IFormFile>("multipart/form-data");
     }
 
     private static async Task<IResult> GetCurrentUser(
@@ -151,7 +159,62 @@ public static class UserEndpoints
                 errors = result.ValidationErrors
             });
         }
-        
-        return Results.Ok(result.Value);
+
+        return Results.Ok(new
+        {
+            success = true,
+            data = result.Value
+        });
+    }
+
+    private static async Task<IResult> UploadAvatar(
+        IMediator mediator,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var form = await httpContext.Request.ReadFormAsync(cancellationToken);
+        var file = form.Files.GetFile("avatar");
+
+        if (file == null || file.Length == 0)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = "No file uploaded or file is empty"
+            });
+        }
+
+        await using var stream = file.OpenReadStream();
+        var command = new UploadAvatarCommand(
+            stream,
+            file.FileName,
+            file.ContentType,
+            file.Length,
+            authenticatedUserId);
+
+        var result = await mediator.Send(command, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data = result.Value
+        });
     }
 }

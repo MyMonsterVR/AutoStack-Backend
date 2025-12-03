@@ -122,11 +122,11 @@ public partial class User : Entity<Guid>
         {
             throw new ArgumentException("Invalid avatar url", nameof(avatarUrl));
         }
-        
+
         AvatarUrl = avatarUrl;
         UpdatedAt = DateTime.UtcNow;
     }
-    
+
     /// <summary>
     /// Check if a url is in a valid url format (No special characters)
     /// </summary>
@@ -143,6 +143,6 @@ public partial class User : Entity<Guid>
      but this regex opens up for the opportunity to have custom user urls,
      as long as they don't include special characters
     */
-    [GeneratedRegex(@"^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-DK")]
+    [GeneratedRegex(@"^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)*(?::[\d]+)?(?:[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-DK")]
     private static partial Regex ValidUrlPattern();
 }
