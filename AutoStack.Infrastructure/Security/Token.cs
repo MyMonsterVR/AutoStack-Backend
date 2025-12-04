@@ -75,6 +75,11 @@ public class Token : IToken
     /// <returns>Principals from token; null if token is invalid</returns>
     public ClaimsPrincipal? VerifyToken(string token)
     {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return null;
+        }
+
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
 
@@ -99,13 +104,14 @@ public class Token : IToken
             if (validatedToken is JwtSecurityToken jwtToken &&
                 !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new SecurityTokenException("Invalid token");
+                return null;
             }
-            
+
             return principal;
         }
-        catch(SecurityTokenException ex)
+        catch (Exception)
         {
+            // Return null for any token validation failure (expired, invalid signature, malformed, etc.)
             return null;
         }
     }
