@@ -7,6 +7,7 @@ using AutoStack.Infrastructure.Options;
 using AutoStack.Infrastructure.Persistence;
 using AutoStack.Infrastructure.Repositories;
 using AutoStack.Infrastructure.Security;
+using AutoStack.Infrastructure.Security.Models;
 using AutoStack.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<Security.Models.CookieSettings>(configuration.GetSection("CookieSettings"));
         services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
+        services.Configure<TwoFactorSettings>(configuration.GetSection("TwoFactorSettings"));
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -78,6 +80,7 @@ public static class DependencyInjection
         services.AddScoped<IStackRepository, StackRepository>();
         services.AddScoped<IPackageRepository, PackageRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IRecoveryCodeRepository, RecoveryCodeRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -87,6 +90,9 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        services.AddScoped<ITotpService, TotpService>();
+        services.AddScoped<IEncryptionService, AesEncryptionService>();
+        services.AddScoped<IRecoveryCodeGenerator, RecoveryCodeGenerator>();
 
         services.AddHostedService<LogCleanupBackgroundService>();
 

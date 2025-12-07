@@ -27,4 +27,9 @@ public interface IToken
     /// <param name="token">The users auth token</param>
     /// <returns>The Claims principal and null if invalid</returns>
     ClaimsPrincipal? VerifyToken(string token);
+    
+    string GenerateTwoFactorToken(Guid userId);
+    Guid? VerifyTwoFactorToken(string token);
+    string GenerateSetupToken(Guid userId, string secretKey);
+    (Guid, string)? VerifySetupToken(string token);
 }

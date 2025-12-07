@@ -2,6 +2,7 @@ using AutoStack.Application.Features.Auth.Commands.Login;
 using AutoStack.Application.Features.Auth.Commands.RefreshToken;
 using AutoStack.Application.Features.Auth.Commands.Register;
 using AutoStack.Infrastructure.Security;
+using AutoStack.Infrastructure.Security.Models;
 using MediatR;
 using Microsoft.Extensions.Options;
 
@@ -62,6 +63,15 @@ public static class LoginEndpoints
                 success = false,
                 message = result.Message,
                 errors = result.ValidationErrors
+            });
+        }
+
+        if (result.Value.RequiresTwoFactor)
+        {
+            return Results.Ok(new
+            {
+                success = true,
+                data = result.Value
             });
         }
 
