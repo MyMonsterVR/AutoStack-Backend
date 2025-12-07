@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\Auth\Commands\" />
+      <Folder Include="DTOs\ForgotPassword\" />
       <Folder Include="Features\Auth\Queries\" />
     </ItemGroup>
 

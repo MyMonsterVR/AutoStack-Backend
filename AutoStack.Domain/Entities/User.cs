@@ -43,6 +43,9 @@ public partial class User : Entity<Guid>
     /// </summary>
     public DateTime? TwoFactorEnabledAt { get; private set; }
 
+    public string? PasswordResetToken { get; private set; }
+    
+    public DateTime? PasswordResetTokenExpiry { get; private set; }
     
     public User()
     {}
@@ -181,5 +184,22 @@ public partial class User : Entity<Guid>
         TwoFactorSecretKey = null;
         TwoFactorEnabledAt = null;
         UpdatedAt = DateTime.UtcNow;
+    }
+    
+    public void SetPasswordResetToken(string resetToken, DateTime expiry)
+    {
+        if (string.IsNullOrWhiteSpace(resetToken))
+        {
+            throw new ArgumentException("Password reset token cannot be null or empty", nameof(resetToken));
+        }
+        
+        PasswordResetToken = resetToken;
+        PasswordResetTokenExpiry = expiry;
+    }
+
+    public void ClearPasswordResetToken()
+    {
+        PasswordResetToken = null;
+        PasswordResetTokenExpiry = null;
     }
 }

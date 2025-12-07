@@ -1,6 +1,8 @@
+using AutoStack.Application.Features.Auth.Commands.ForgotPassword;
 using AutoStack.Application.Features.Auth.Commands.Login;
 using AutoStack.Application.Features.Auth.Commands.RefreshToken;
 using AutoStack.Application.Features.Auth.Commands.Register;
+using AutoStack.Application.Features.Auth.Commands.ResetPassword;
 using AutoStack.Infrastructure.Security;
 using AutoStack.Infrastructure.Security.Models;
 using MediatR;
@@ -43,6 +45,18 @@ public static class LoginEndpoints
             .WithName("Logout")
             .WithSummary("Logout user")
             .Produces(200);
+        
+        group.MapPost("/forgot-password", ForgotPassword)
+            .WithName("ForgotPassword")
+            .WithSummary("Forgot password")
+            .Produces(200)
+            .Produces(400);
+        
+        group.MapPost("/reset-password", ResetPassword)
+            .WithName("ResetPassword")
+            .WithSummary("Reset password")
+            .Produces(200)
+            .Produces(400);
     }
 
     private static async Task<IResult> Login(
@@ -125,7 +139,8 @@ public static class LoginEndpoints
         ICookieManager cookieManager,
         IOptions<JwtSettings> jwtSettings,
         HttpContext httpContext,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var refreshToken = cookieManager.GetRefreshTokenFromCookie(httpContext);
 
@@ -173,7 +188,8 @@ public static class LoginEndpoints
 
     private static IResult Logout(
         ICookieManager cookieManager,
-        HttpContext httpContext)
+        HttpContext httpContext
+    )
     {
         cookieManager.ClearAuthCookies(httpContext);
 
@@ -181,6 +197,56 @@ public static class LoginEndpoints
         {
             success = true,
             message = "Logged out successfully"
+        });
+    }
+
+    private static async Task<IResult> ForgotPassword(
+        ForgotPasswordCommand command,
+        IMediator mediator,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await mediator.Send(command, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data = "Password reset email sent"
+        });
+    }
+
+    private static async Task<IResult> ResetPassword(
+        ResetPasswordCommand command,
+        IMediator mediator,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await mediator.Send(command, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data = "Password reset successfully"
         });
     }
 }
