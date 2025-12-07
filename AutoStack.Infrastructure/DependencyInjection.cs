@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Resend;
 
 namespace AutoStack.Infrastructure;
 
@@ -93,8 +94,18 @@ public static class DependencyInjection
         services.AddScoped<ITotpService, TotpService>();
         services.AddScoped<IEncryptionService, AesEncryptionService>();
         services.AddScoped<IRecoveryCodeGenerator, RecoveryCodeGenerator>();
+        services.AddScoped<IEmailService, EmailService>();
 
         services.AddHostedService<LogCleanupBackgroundService>();
+
+        // Email service (Resend)
+        services.AddOptions();
+        services.AddHttpClient<ResendClient>();
+        services.Configure<ResendClientOptions>(o =>
+        {
+            o.ApiToken = configuration["ResendClient:ApiToken"];
+        });
+        services.AddTransient<IResend, ResendClient>();
 
         return services;
     }
