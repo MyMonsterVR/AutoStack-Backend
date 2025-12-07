@@ -178,14 +178,6 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAuthorizationService(builder.Configuration);
 
-// Add health checks
-builder.Services.AddHealthChecks()
-    .AddNpgSql(
-        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
-        name: "postgres",
-        timeout: TimeSpan.FromSeconds(5),
-        tags: ["db", "ready"]);
-
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -247,16 +239,5 @@ app.MapLoginEndpoints();
 app.MapTwoFactorEndpoints();
 app.MapStackEndpoints();
 app.MapCliEndpoints();
-
-// Health check endpoints
-app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = healthCheck => healthCheck.Tags.Contains("ready")
-});
-
-app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = _ => false // Liveness doesn't check dependencies
-});
 
 await app.RunAsync();
