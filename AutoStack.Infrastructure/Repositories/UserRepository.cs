@@ -44,6 +44,18 @@ public class UserRepository : IUserRepository
             .AnyAsync(u => u.Id == id, cancellationToken);
     }
 
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+    }
+
+    public async Task<User?> GetByPasswordResetTokenAsync(string token, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.PasswordResetToken == token, cancellationToken);
+    }
+
     public async Task<bool> EmailExists(string email, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Users
@@ -56,15 +68,5 @@ public class UserRepository : IUserRepository
         return await _dbContext.Users
             .AsNoTracking()
             .AnyAsync(u => u.Username == username, cancellationToken);
-    }
-
-    public Task<int> CountStacksByUserId(Guid userId, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<int> CountTemplatesByUserId(Guid userId, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 }

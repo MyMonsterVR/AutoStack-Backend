@@ -43,6 +43,9 @@ public partial class User : Entity<Guid>
     /// </summary>
     public DateTime? TwoFactorEnabledAt { get; private set; }
 
+    public string? PasswordResetToken { get; private set; }
+    
+    public DateTime? PasswordResetTokenExpiry { get; private set; }
     
     public User()
     {}
@@ -73,7 +76,20 @@ public partial class User : Entity<Guid>
         }
 
         var user = new User(Guid.NewGuid(), email, username);
+        user.SetDefaultAvatar();
         return user;
+    }
+
+    /// <summary>
+    /// Sets a default avatar URL based on the user's username
+    /// </summary>
+    private void SetDefaultAvatar()
+    {
+        // Generate avatar using UI Avatars service with username initials
+        // Uses a clean blue background (#3b82f6) matching AutoStack brand
+        var encodedUsername = Uri.EscapeDataString(Username);
+        AvatarUrl = $"https://ui-avatars.com/api/?name={encodedUsername}&background=3b82f6&color=fff&size=256&bold=true";
+        UpdatedAt = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -181,5 +197,22 @@ public partial class User : Entity<Guid>
         TwoFactorSecretKey = null;
         TwoFactorEnabledAt = null;
         UpdatedAt = DateTime.UtcNow;
+    }
+    
+    public void SetPasswordResetToken(string resetToken, DateTime expiry)
+    {
+        if (string.IsNullOrWhiteSpace(resetToken))
+        {
+            throw new ArgumentException("Password reset token cannot be null or empty", nameof(resetToken));
+        }
+        
+        PasswordResetToken = resetToken;
+        PasswordResetTokenExpiry = expiry;
+    }
+
+    public void ClearPasswordResetToken()
+    {
+        PasswordResetToken = null;
+        PasswordResetTokenExpiry = null;
     }
 }

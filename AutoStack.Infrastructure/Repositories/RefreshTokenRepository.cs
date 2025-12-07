@@ -50,4 +50,15 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(rt => rt.Token == refreshToken, cancellationToken);
     }
+
+    /// <summary>
+    /// Deletes all refresh tokens with user id
+    /// </summary>
+    /// <param name="userId">The id of the user</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>Number of deleted rows</returns>
+    public async Task<int> DeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.RefreshTokens.Where(rt => rt.UserId == userId).ExecuteDeleteAsync(cancellationToken);
+    }
 }

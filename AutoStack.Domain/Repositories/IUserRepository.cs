@@ -9,6 +9,22 @@ namespace AutoStack.Domain.Repositories;
 public interface IUserRepository : IRepository<User, Guid>
 {
     /// <summary>
+    /// Get an account by their email
+    /// </summary>
+    /// <param name="email">The email address to find user on</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>User if found; else null</returns>
+    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get an account by their password reset token
+    /// </summary>
+    /// <param name="token">The password reset token to find user on</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>User if found; else null</returns>
+    Task<User?> GetByPasswordResetTokenAsync(string token, CancellationToken cancellationToken = default);
+    
+    /// <summary>
     /// Checks if an email address is already registered
     /// </summary>
     /// <param name="email">The email address to check</param>
@@ -23,20 +39,4 @@ public interface IUserRepository : IRepository<User, Guid>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>True if the username exists, false otherwise</returns>
     Task<bool> UsernameExists(string username, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Counts the number of stacks created by a user
-    /// </summary>
-    /// <param name="userId">The ID of the user</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>The count of stacks created by the user</returns>
-    Task<int> CountStacksByUserId(Guid userId, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Counts the number of templates created by a user
-    /// </summary>
-    /// <param name="userId">The ID of the user</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>The count of templates created by the user</returns>
-    Task<int> CountTemplatesByUserId(Guid userId, CancellationToken cancellationToken = default);
 }

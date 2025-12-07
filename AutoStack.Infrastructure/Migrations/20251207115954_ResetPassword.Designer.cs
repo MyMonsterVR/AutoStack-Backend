@@ -3,6 +3,7 @@ using System;
 using AutoStack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutoStack.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251207115954_ResetPassword")]
+    partial class ResetPassword
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -339,7 +342,7 @@ namespace AutoStack.Infrastructure.Migrations
                     b.Property<string>("PasswordResetToken")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("PasswordResetTokenExpiry")
+                    b.Property<DateTime?>("PasswordResetTokenAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("TwoFactorEnabled")
