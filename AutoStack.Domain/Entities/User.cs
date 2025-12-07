@@ -27,6 +27,22 @@ public partial class User : Entity<Guid>
     /// Gets or sets the user's avatar url
     /// </summary>
     public string AvatarUrl  { get; set; }  = string.Empty;
+
+    /// <summary>
+    /// Gets the status of 2FA
+    /// </summary>
+    public bool TwoFactorEnabled { get; private set; }
+
+    /// <summary>
+    /// Gets the secret key for 2FA
+    /// </summary>
+    public string? TwoFactorSecretKey { get; private set; }
+
+    /// <summary>
+    /// Gets the date 2FA was enabled
+    /// </summary>
+    public DateTime? TwoFactorEnabledAt { get; private set; }
+
     
     public User()
     {}
@@ -145,4 +161,25 @@ public partial class User : Entity<Guid>
     */
     [GeneratedRegex(@"^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)*(?::[\d]+)?(?:[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-DK")]
     private static partial Regex ValidUrlPattern();
+
+    public void EnableTwoFactorAuthentication(string twoFactorSecretKey)
+    {
+        if (string.IsNullOrWhiteSpace(twoFactorSecretKey))
+        {
+            throw new ArgumentException("Two factor credentials cannot be null or empty", nameof(twoFactorSecretKey));
+        }
+        
+        TwoFactorEnabled = true;
+        TwoFactorSecretKey = twoFactorSecretKey;
+        TwoFactorEnabledAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void DisableTwoFactorAuthentication()
+    {
+        TwoFactorEnabled = false;
+        TwoFactorSecretKey = null;
+        TwoFactorEnabledAt = null;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

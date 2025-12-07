@@ -16,6 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Package> Packages => Set<Package>();
     public DbSet<CliVersion> CliVersions => Set<CliVersion>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<RecoveryCode> RecoveryCodes => Set<RecoveryCode>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

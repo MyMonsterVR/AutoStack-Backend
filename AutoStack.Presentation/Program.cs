@@ -6,6 +6,7 @@ using AutoStack.Presentation;
 using AutoStack.Presentation.Endpoints.Cli;
 using AutoStack.Presentation.Endpoints.Login;
 using AutoStack.Presentation.Endpoints.Stack;
+using AutoStack.Presentation.Endpoints.TwoFactor;
 using AutoStack.Presentation.Endpoints.User;
 using AutoStack.Presentation.Middleware;
 using Microsoft.AspNetCore.RateLimiting;
@@ -61,6 +62,36 @@ builder.Services.AddRateLimiter(options =>
         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         options.QueueLimit = 0;
     });
+
+    // Rate limiter for 2FA verification
+    options.AddFixedWindowLimiter("2fa-verify", options =>
+    {
+        options.PermitLimit = 5;
+        options.Window = TimeSpan.FromMinutes(5);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 0;
+    });
+
+    // Rate limiter for recovery code usage
+    options.AddFixedWindowLimiter("2fa-recovery", options =>
+    {
+        options.PermitLimit = 3;
+        options.Window = TimeSpan.FromMinutes(15);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 0;
+    });
+
+    // Rate limiter for sensitive 2FA operations (disable, regenerate codes)
+    options.AddPolicy("2fa-sensitive", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 3,
+                Window = TimeSpan.FromHours(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
 
     // Rate limiter for CLI download tracking - dynamic based on authentication
     options.AddPolicy("cli-track", httpContext =>
@@ -213,6 +244,7 @@ app.UseCliIdentification();
 
 app.MapUserEndpoints();
 app.MapLoginEndpoints();
+app.MapTwoFactorEndpoints();
 app.MapStackEndpoints();
 app.MapCliEndpoints();
 

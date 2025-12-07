@@ -17,8 +17,18 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.Username).IsRequired().HasMaxLength(100);
         builder.Property(x => x.PasswordHash).IsRequired().HasMaxLength(255);
         builder.Property(x => x.AvatarUrl).HasMaxLength(255);
+
+        builder.Property(x => x.TwoFactorEnabled)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(x => x.TwoFactorSecretKey)
+            .HasMaxLength(512);
+
+        builder.Property(x => x.TwoFactorEnabledAt);
         
         builder.HasIndex(x => x.Email).IsUnique();
         builder.HasIndex(x => x.Username).IsUnique();
+        
     }
 }

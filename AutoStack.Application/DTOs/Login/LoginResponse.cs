@@ -6,12 +6,22 @@
 public class LoginResponse
 {
     /// <summary>
-    /// Gets or sets the JWT access token for API authentication
+    /// Indicates if 2FA verification is required to complete login
     /// </summary>
-    public required string AccessToken { get; set; }
+    public bool RequiresTwoFactor { get; set; }
 
     /// <summary>
-    /// Gets or sets the refresh token for obtaining new access tokens
+    /// Temporary token for 2FA verification (only present if RequiresTwoFactor is true)
     /// </summary>
-    public required string RefreshToken { get; set; }
+    public string? TwoFactorToken { get; set; }
+
+    /// <summary>
+    /// Gets or sets the JWT access token for API authentication (null if RequiresTwoFactor is true)
+    /// </summary>
+    public string? AccessToken { get; set; }
+
+    /// <summary>
+    /// Gets or sets the refresh token for obtaining new access tokens (null if RequiresTwoFactor is true)
+    /// </summary>
+    public string? RefreshToken { get; set; }
 }

@@ -2,8 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AutoStack.Infrastructure.Security;
+using AutoStack.Infrastructure.Security.Models;
 using FluentAssertions;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 

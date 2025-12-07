@@ -73,6 +73,23 @@ public class LoginCommandHandler : ICommandHandler<LoginCommand, LoginResponse>
             return Result<LoginResponse>.Failure("User not found");
         }
 
+        // Check if 2FA is enabled
+        if (user.TwoFactorEnabled)
+        {
+            var twoFactorToken = _token.GenerateTwoFactorToken(userId.Value);
+
+            var twoFactorResponse = new LoginResponse
+            {
+                RequiresTwoFactor = true,
+                TwoFactorToken = twoFactorToken,
+                AccessToken = null,
+                RefreshToken = null
+            };
+
+            return Result<LoginResponse>.Success(twoFactorResponse);
+        }
+
+        // Normal login flow (no 2FA)
         var generatedToken = _token.GenerateAccessToken(userId.Value, user.Username, user.Email);
         var userToken = _token.GenerateRefreshToken(userId.Value);
 
@@ -98,8 +115,10 @@ public class LoginCommandHandler : ICommandHandler<LoginCommand, LoginResponse>
 
         var response = new LoginResponse
         {
-             AccessToken = generatedToken,
-             RefreshToken = userToken.Token,
+            RequiresTwoFactor = false,
+            TwoFactorToken = null,
+            AccessToken = generatedToken,
+            RefreshToken = userToken.Token
         };
 
         return Result<LoginResponse>.Success(response);

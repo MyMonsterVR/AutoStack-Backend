@@ -1,4 +1,4 @@
-namespace AutoStack.Infrastructure.Security;
+namespace AutoStack.Infrastructure.Security.Models;
 
 /// <summary>
 /// Configuration settings for JWT token generation and validation
