@@ -85,10 +85,9 @@ public partial class User : Entity<Guid>
     /// </summary>
     private void SetDefaultAvatar()
     {
-        // Generate avatar using UI Avatars service with username initials
-        // Uses a clean blue background (#3b82f6) matching AutoStack brand
+        // Generate avatar using dicebear service with username
         var encodedUsername = Uri.EscapeDataString(Username);
-        AvatarUrl = $"https://ui-avatars.com/api/?name={encodedUsername}&background=3b82f6&color=fff&size=256&bold=true";
+        AvatarUrl = $"https://api.dicebear.com/9.x/thumbs/svg?seed={encodedUsername}";
         UpdatedAt = DateTime.UtcNow;
     }
 
