@@ -11,36 +11,38 @@ public class DeleteStackCommandHandler : ICommandHandler<DeleteStackCommand, boo
     private readonly IStackRepository _stackRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditLogService _auditLogService;
-    private readonly IUserRepository _userRepository;
 
     public DeleteStackCommandHandler(IStackRepository stackRepository, IUnitOfWork unitOfWork, IAuditLogService auditLogService, IUserRepository userRepository)
     {
         _stackRepository = stackRepository;
         _unitOfWork = unitOfWork;
         _auditLogService = auditLogService;
-        _userRepository = userRepository;
     }
     
     public async Task<Result<bool>> Handle(DeleteStackCommand request, CancellationToken cancellationToken)
     {
         // Load stack with packages for detailed logging
-        var stack = await _stackRepository.GetByIdWithInfoAsync(request.StackId, cancellationToken);
-        if (stack == null)
+        var stackInfo = await _stackRepository.GetByIdWithInfoAsync(request.StackId, cancellationToken);
+        if (stackInfo == null)
         {
             return Result<bool>.Failure("Stack not found");
         }
 
         // Capture stack details before deletion
-        var stackName = stack.Name;
-        var stackType = stack.Type;
-        var stackUserId = stack.UserId;
-        var packageCount = stack.Packages?.Count ?? 0;
-        var packageNames = stack.Packages?.Select(p => p.Package.Name).ToList() ?? new List<string>();
-        var downloads = stack.Downloads;
+        var stackName = stackInfo.Name;
+        var stackType = stackInfo.Type;
+        var stackUserId = stackInfo.UserId;
+        var packageCount = stackInfo.Packages.Count;
+        var packageNames = stackInfo.Packages?.Select(p => p.Package.Name).ToList() ?? new List<string>();
+        var downloads = stackInfo.Downloads;
+        var username = stackInfo.User.Username;
 
-        // Get user for audit log
-        var user = await _userRepository.GetByIdAsync(stackUserId, cancellationToken);
-        var username = user?.Username ?? "Unknown";
+        // Load the stack for deletion (without includes to avoid tracking conflicts)
+        var stack = await _stackRepository.GetByIdAsync(request.StackId, cancellationToken);
+        if (stack == null)
+        {
+            return Result<bool>.Failure("Stack not found");
+        }
 
         await _stackRepository.DeleteAsync(stack, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
