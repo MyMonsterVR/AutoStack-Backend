@@ -1,3 +1,4 @@
+using System.Net;
 using AutoStack.Application;
 using AutoStack.Infrastructure;
 using AutoStack.Presentation;
@@ -8,6 +9,7 @@ using AutoStack.Presentation.Endpoints.TwoFactor;
 using AutoStack.Presentation.Endpoints.User;
 using AutoStack.Presentation.Extensions;
 using AutoStack.Presentation.Middleware;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 
@@ -17,6 +19,24 @@ builder.Host.UseDefaultServiceProvider(options =>
 {
     options.ValidateScopes = true;
     options.ValidateOnBuild = true;
+});
+
+// Configure forwarded headers to properly read client IP behind our reverse proxy
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    var proxyIp = builder.Configuration["ReverseProxy:KnownProxyIp"];
+    if (!string.IsNullOrEmpty(proxyIp) && IPAddress.TryParse(proxyIp, out var parsedIp))
+    {
+        options.KnownProxies.Add(parsedIp);
+    }
+    else
+    {
+        // Development fallback - accept from any proxy (less secure)
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+    }
 });
 
 builder.Services.AddRateLimiting();
@@ -42,6 +62,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAuthorizationService(builder.Configuration);
 
 var app = builder.Build();
+
+// Must be called before other middleware to properly read forwarded headers
+app.UseForwardedHeaders();
 
 app.UseExceptionHandler();
 
