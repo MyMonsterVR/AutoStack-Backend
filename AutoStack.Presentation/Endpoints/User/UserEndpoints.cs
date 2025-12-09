@@ -1,5 +1,6 @@
 ﻿using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Models;
+using AutoStack.Application.Features.Users.Commands.DeleteAccount;
 using AutoStack.Application.Features.Users.Commands.EditUser;
 using AutoStack.Application.Features.Users.Commands.UploadAvatar;
 using AutoStack.Application.Features.Users.Queries.GetUser;
@@ -36,6 +37,11 @@ public static class UserEndpoints
             .RequireAuthorization()
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data");
+        
+        group.MapGet("/deleteaccount", DeleteAccount)
+            .WithName("DeleteAccount")
+            .WithSummary("Delete account")
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> GetCurrentUser(
@@ -201,6 +207,37 @@ public static class UserEndpoints
 
         var result = await mediator.Send(command, cancellationToken);
 
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            data = result.Value
+        });
+    }
+
+    private static async Task<IResult> DeleteAccount(
+        IMediator mediator,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        {
+            return Results.Unauthorized();
+        }
+        
+        var result = await mediator.Send(new DeleteAccountCommand(UserId: authenticatedUserId), cancellationToken);
+        
         if (!result.IsSuccess)
         {
             return Results.BadRequest(new

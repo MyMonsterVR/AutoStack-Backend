@@ -27,7 +27,7 @@ public interface IRepository<TAggregate, TId>
     Task UpdateAsync(TAggregate aggregate, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes an aggregate by its ID.
+    /// Deletes an aggregate.
     /// </summary>
     /// <param name="aggregate">The aggregate to delete.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
