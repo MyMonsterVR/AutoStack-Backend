@@ -19,8 +19,7 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
         _handler = new DeleteStackCommandHandler(
             MockStackRepository.Object,
             MockUnitOfWork.Object,
-            MockAuditLog.Object,
-            MockUserRepository.Object
+            MockAuditLog.Object
         );
     }
 
@@ -45,10 +44,10 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(stack);
 
-        MockUserRepository.Setup(r => r.GetByIdAsync(
-                user.Id,
+        MockStackRepository.Setup(r => r.GetByIdAsync(
+                stack.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+            .ReturnsAsync(stack);
 
         MockStackRepository.Setup(r => r.DeleteAsync(
                 It.IsAny<Stack>(),
@@ -100,10 +99,10 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(stack);
 
-        MockUserRepository.Setup(r => r.GetByIdAsync(
-                user.Id,
+        MockStackRepository.Setup(r => r.GetByIdAsync(
+                stack.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+            .ReturnsAsync(stack);
 
         MockStackRepository.Setup(r => r.DeleteAsync(
                 It.IsAny<Stack>(),
@@ -135,10 +134,10 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(stack);
 
-        MockUserRepository.Setup(r => r.GetByIdAsync(
-                user.Id,
+        MockStackRepository.Setup(r => r.GetByIdAsync(
+                stack.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+            .ReturnsAsync(stack);
 
         MockStackRepository.Setup(r => r.DeleteAsync(
                 It.IsAny<Stack>(),
@@ -168,10 +167,10 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(stack);
 
-        MockUserRepository.Setup(r => r.GetByIdAsync(
-                user.Id,
+        MockStackRepository.Setup(r => r.GetByIdAsync(
+                stack.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+            .ReturnsAsync(stack);
 
         MockStackRepository.Setup(r => r.DeleteAsync(
                 It.IsAny<Stack>(),
@@ -189,7 +188,7 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldGetUserForAuditLog()
+    public async Task Handle_ShouldGetStackForDeletion()
     {
         var user = new UserBuilder().Build();
         var stack = new StackBuilder()
@@ -203,10 +202,10 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(stack);
 
-        MockUserRepository.Setup(r => r.GetByIdAsync(
-                user.Id,
+        MockStackRepository.Setup(r => r.GetByIdAsync(
+                stack.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+            .ReturnsAsync(stack);
 
         MockStackRepository.Setup(r => r.DeleteAsync(
                 It.IsAny<Stack>(),
@@ -218,8 +217,8 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
 
         await _handler.Handle(command, CancellationToken.None);
 
-        MockUserRepository.Verify(r => r.GetByIdAsync(
-            user.Id,
+        MockStackRepository.Verify(r => r.GetByIdAsync(
+            stack.Id,
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -238,10 +237,10 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(stack);
 
-        MockUserRepository.Setup(r => r.GetByIdAsync(
-                userId,
+        MockStackRepository.Setup(r => r.GetByIdAsync(
+                stack.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User?)null);
+            .ReturnsAsync(stack);
 
         MockStackRepository.Setup(r => r.DeleteAsync(
                 It.IsAny<Stack>(),
@@ -279,10 +278,10 @@ public class DeleteStackCommandHandlerTests : CommandHandlerTestBase
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(stack);
 
-        MockUserRepository.Setup(r => r.GetByIdAsync(
-                user.Id,
+        MockStackRepository.Setup(r => r.GetByIdAsync(
+                stack.Id,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
+            .ReturnsAsync(stack);
 
         MockStackRepository.Setup(r => r.DeleteAsync(
                 It.IsAny<Stack>(),

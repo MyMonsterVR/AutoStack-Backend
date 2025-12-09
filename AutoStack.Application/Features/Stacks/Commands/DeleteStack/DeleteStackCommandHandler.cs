@@ -12,7 +12,7 @@ public class DeleteStackCommandHandler : ICommandHandler<DeleteStackCommand, boo
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditLogService _auditLogService;
 
-    public DeleteStackCommandHandler(IStackRepository stackRepository, IUnitOfWork unitOfWork, IAuditLogService auditLogService, IUserRepository userRepository)
+    public DeleteStackCommandHandler(IStackRepository stackRepository, IUnitOfWork unitOfWork, IAuditLogService auditLogService)
     {
         _stackRepository = stackRepository;
         _unitOfWork = unitOfWork;
@@ -32,10 +32,10 @@ public class DeleteStackCommandHandler : ICommandHandler<DeleteStackCommand, boo
         var stackName = stackInfo.Name;
         var stackType = stackInfo.Type;
         var stackUserId = stackInfo.UserId;
-        var packageCount = stackInfo.Packages.Count;
+        var packageCount = stackInfo.Packages?.Count ?? 0;
         var packageNames = stackInfo.Packages?.Select(p => p.Package.Name).ToList() ?? new List<string>();
         var downloads = stackInfo.Downloads;
-        var username = stackInfo.User.Username;
+        var username = stackInfo.User?.Username ?? "Unknown";
 
         // Load the stack for deletion (without includes to avoid tracking conflicts)
         var stack = await _stackRepository.GetByIdAsync(request.StackId, cancellationToken);
