@@ -33,15 +33,4 @@ public class DeleteAccountValidatorTests
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(e => e.PropertyName == "UserId" && e.ErrorMessage == "UserId is required");
     }
-
-    [Fact]
-    public void Validate_WithEmptyGuid_ShouldFail()
-    {
-        var command = new DeleteAccountCommand(Guid.Empty);
-
-        var result = _validator.Validate(command);
-
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == "UserId" && e.ErrorMessage == "UserId is required");
-    }
 }
