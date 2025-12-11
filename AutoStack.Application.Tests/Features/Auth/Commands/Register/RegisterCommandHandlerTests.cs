@@ -68,7 +68,8 @@ public class RegisterCommandHandlerTests : CommandHandlerTestBase
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.UserId.Should().NotBeEmpty();
     }
 
     [Fact]

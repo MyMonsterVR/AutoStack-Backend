@@ -1,4 +1,5 @@
 ﻿using AutoStack.Application.Common.Interfaces.Commands;
+using AutoStack.Application.DTOs.Login;
 
 namespace AutoStack.Application.Features.Auth.Commands.Register;
 
@@ -9,4 +10,4 @@ namespace AutoStack.Application.Features.Auth.Commands.Register;
 /// <param name="Username">The username for the new user</param>
 /// <param name="Password">The password for the new user</param>
 /// <param name="ConfirmPassword">The password confirmation</param>
-public record RegisterCommand(string Email, string Username, string Password, string ConfirmPassword) : ICommand<bool>;
+public record RegisterCommand(string Email, string Username, string Password, string ConfirmPassword) : ICommand<RegisterResponse>;
