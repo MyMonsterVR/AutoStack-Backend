@@ -5,6 +5,7 @@ using AutoStack.Application.Tests.Common;
 using AutoStack.Domain.Entities;
 using AutoStack.Domain.Enums;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -13,13 +14,17 @@ namespace AutoStack.Application.Tests.Features.Users.Commands.DeleteAccount;
 public class DeleteAccountCommandHandlerTests : CommandHandlerTestBase
 {
     private readonly DeleteAccountCommandHandler _handler;
+    private readonly Mock<ILogger<DeleteAccountCommandHandler>> _mockLogger;
 
     public DeleteAccountCommandHandlerTests()
     {
+        _mockLogger = new Mock<ILogger<DeleteAccountCommandHandler>>();
+
         _handler = new DeleteAccountCommandHandler(
             MockUserRepository.Object,
             MockUnitOfWork.Object,
-            MockAuditLog.Object
+            MockAuditLog.Object,
+            _mockLogger.Object
         );
     }
 
@@ -71,7 +76,7 @@ public class DeleteAccountCommandHandlerTests : CommandHandlerTestBase
         MockUnitOfWork.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         MockAuditLog.Verify(a => a.LogAsync(
                 It.Is<AuditLogRequest>(req =>
-                    req.Level == LogLevel.Information &&
+                    req.Level == Domain.Enums.LogLevel.Information &&
                     req.Category == LogCategory.User &&
                     req.Message == "Account deleted" &&
                     req.UserIdOverride == user.Id &&

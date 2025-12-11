@@ -6,6 +6,7 @@ using AutoStack.Application.Tests.Builders;
 using AutoStack.Application.Tests.Common;
 using AutoStack.Domain.Entities;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -15,16 +16,19 @@ public class EditUserCommandHandlerTests : CommandHandlerTestBase
 {
     private readonly Mock<IPasswordHasher> _mockPasswordHasher;
     private readonly EditUserCommandHandler _handler;
+    private readonly Mock<ILogger<EditUserCommandHandler>> _mockLogger;
 
     public EditUserCommandHandlerTests()
     {
         _mockPasswordHasher = new Mock<IPasswordHasher>();
+        _mockLogger = new Mock<ILogger<EditUserCommandHandler>>();
 
         _handler = new EditUserCommandHandler(
             MockUserRepository.Object,
             MockUnitOfWork.Object,
             _mockPasswordHasher.Object,
-            MockAuditLog.Object
+            MockAuditLog.Object,
+            _mockLogger.Object
         );
     }
 

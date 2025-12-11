@@ -3,6 +3,7 @@ using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
 using AutoStack.Domain.Enums;
 using AutoStack.Domain.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStack.Application.Features.Users.Commands.DeleteAccount;
 
@@ -11,11 +12,14 @@ public class DeleteAccountCommandHandler : ICommandHandler<DeleteAccountCommand,
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditLogService _auditLogService;
-    public DeleteAccountCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IAuditLogService auditLogService)
+    private readonly ILogger<DeleteAccountCommandHandler> _logger;
+
+    public DeleteAccountCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IAuditLogService auditLogService, ILogger<DeleteAccountCommandHandler> logger)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _auditLogService = auditLogService;
+        _logger = logger;
     }
     
     public async Task<Result<bool>> Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
@@ -41,16 +45,16 @@ public class DeleteAccountCommandHandler : ICommandHandler<DeleteAccountCommand,
             {
                 await _auditLogService.LogAsync(new AuditLogRequest
                 {
-                    Level = LogLevel.Information,
+                    Level = Domain.Enums.LogLevel.Information,
                     Category = LogCategory.User,
                     Message = "Account deleted",
                     UserIdOverride = user.Id,
                     UsernameOverride = user.Username
                 }, cancellationToken);
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore logging failures
+                _logger.LogError(ex, "Failed to log account deletion audit for user {UserId}", user.Id);
             }
             
             return Result<bool>.Success(true);
