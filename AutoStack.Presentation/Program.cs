@@ -3,6 +3,7 @@ using AutoStack.Application;
 using AutoStack.Infrastructure;
 using AutoStack.Presentation;
 using AutoStack.Presentation.Endpoints.Cli;
+using AutoStack.Presentation.Endpoints.EmailVerification;
 using AutoStack.Presentation.Endpoints.Login;
 using AutoStack.Presentation.Endpoints.Stack;
 using AutoStack.Presentation.Endpoints.TwoFactor;
@@ -125,5 +126,6 @@ app.MapLoginEndpoints();
 app.MapTwoFactorEndpoints();
 app.MapStackEndpoints();
 app.MapCliEndpoints();
+app.MapEmailVerificationEndpoints();
 
 await app.RunAsync();

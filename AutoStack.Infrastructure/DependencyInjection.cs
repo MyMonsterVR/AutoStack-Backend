@@ -7,9 +7,12 @@ using AutoStack.Infrastructure.Options;
 using AutoStack.Infrastructure.Persistence;
 using AutoStack.Infrastructure.Repositories;
 using AutoStack.Infrastructure.Security;
+using AutoStack.Infrastructure.Security.Handlers;
 using AutoStack.Infrastructure.Security.Models;
+using AutoStack.Infrastructure.Security.Requirements;
 using AutoStack.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -117,7 +120,11 @@ public static class DependencyInjection
         if (jwtSettings == null)
             throw new InvalidOperationException("JwtSettings configuration is missing");
 
-        services.AddAuthorization()
+        services.AddAuthorization(options =>
+            {
+                options.AddPolicy("EmailVerified", policy =>
+                    policy.Requirements.Add(new EmailVerifiedRequirement()));
+            })
             .AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -139,7 +146,9 @@ public static class DependencyInjection
                     ClockSkew = TimeSpan.Zero
                 };
             });
-        
+
+        services.AddScoped<IAuthorizationHandler, EmailVerifiedHandler>();
+
         return services;
     }
 }

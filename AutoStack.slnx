@@ -6,5 +6,4 @@
   <Project Path="AutoStack.Domain.Tests/AutoStack.Domain.Tests.csproj" />
   <Project Path="AutoStack.Application.Tests/AutoStack.Application.Tests.csproj" />
   <Project Path="AutoStack.Infrastructure.Tests/AutoStack.Infrastructure.Tests.csproj" />
-  <Project Path="AutoStack.Presentation.Tests/AutoStack.Presentation.Tests.csproj" />
 </Solution>

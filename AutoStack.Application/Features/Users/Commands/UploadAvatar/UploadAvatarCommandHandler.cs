@@ -91,7 +91,7 @@ public class UploadAvatarCommandHandler : ICommandHandler<UploadAvatarCommand, U
                 // Ignore logging failures
             }
 
-            var userResponse = new UserResponse(user.Id, user.Email, user.Username, user.AvatarUrl);
+            var userResponse = new UserResponse(user.Id, user.Email, user.Username, user.AvatarUrl, user.EmailVerified);
 
             return Result<UserResponse>.Success(userResponse);
         }

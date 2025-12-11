@@ -29,19 +29,19 @@ public static class UserEndpoints
         group.MapPatch("/edit", EditUser)
             .WithName("EditUser")
             .WithSummary("Edit User")
-            .RequireAuthorization();
+            .RequireAuthorization("EmailVerified");
 
         group.MapPost("/avatar", UploadAvatar)
             .WithName("UploadAvatar")
             .WithSummary("Upload user avatar")
-            .RequireAuthorization()
+            .RequireAuthorization("EmailVerified")
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data");
-        
+
         group.MapGet("/deleteaccount", DeleteAccount)
             .WithName("DeleteAccount")
             .WithSummary("Delete account")
-            .RequireAuthorization();
+            .RequireAuthorization("EmailVerified");
     }
 
     private static async Task<IResult> GetCurrentUser(
