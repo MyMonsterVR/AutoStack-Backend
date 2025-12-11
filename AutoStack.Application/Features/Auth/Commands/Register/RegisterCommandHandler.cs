@@ -3,6 +3,7 @@ using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
+using AutoStack.Application.DTOs.Login;
 using AutoStack.Domain.Entities;
 using AutoStack.Domain.Enums;
 using AutoStack.Domain.Repositories;
@@ -13,7 +14,7 @@ namespace AutoStack.Application.Features.Auth.Commands.Register;
 /// <summary>
 /// Handles the registration command by creating a new user account
 /// </summary>
-public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
+public class RegisterCommandHandler : ICommandHandler<RegisterCommand, RegisterResponse>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -43,8 +44,8 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
     /// </summary>
     /// <param name="request">The registration command containing user details</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>A result indicating success or failure with an error message</returns>
-    public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    /// <returns>A result containing the registered user's ID or failure with an error message</returns>
+    public async Task<Result<RegisterResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         if (await _userRepository.EmailExists(request.Email.ToLower(), cancellationToken))
         {
@@ -69,7 +70,7 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
                 // Ignore logging failures
             }
 
-            return Result<bool>.Failure("Email already exists");
+            return Result<RegisterResponse>.Failure("Email already exists");
         }
 
         if (await _userRepository.UsernameExists(request.Username.ToLower(), cancellationToken))
@@ -95,12 +96,12 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
                 // Ignore logging failures
             }
 
-            return Result<bool>.Failure("Username already exists");
+            return Result<RegisterResponse>.Failure("Username already exists");
         }
 
         if (request.Password != request.ConfirmPassword)
         {
-            return Result<bool>.Failure("Passwords do not match");
+            return Result<RegisterResponse>.Failure("Passwords do not match");
         }
 
         var user = User.CreateUser(request.Email.ToLower(), request.Username.ToLower());
@@ -143,7 +144,7 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
             // Ignore logging failures
         }
 
-        return Result<bool>.Success(true);
+        return Result<RegisterResponse>.Success(new RegisterResponse(user.Id));
     }
 
     private async Task SendVerificationEmail(string email, string username, string code, int expiryMinutes)
