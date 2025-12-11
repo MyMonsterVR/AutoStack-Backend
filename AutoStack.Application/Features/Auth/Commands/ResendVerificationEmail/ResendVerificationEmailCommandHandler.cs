@@ -1,141 +1,70 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using AutoStack.Application.Common.Interfaces;
-using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Common.Interfaces.Commands;
 using AutoStack.Application.Common.Models;
-using AutoStack.Domain.Entities;
 using AutoStack.Domain.Enums;
 using AutoStack.Domain.Repositories;
 using Microsoft.Extensions.Configuration;
 
-namespace AutoStack.Application.Features.Auth.Commands.Register;
+namespace AutoStack.Application.Features.Auth.Commands.ResendVerificationEmail;
 
-/// <summary>
-/// Handles the registration command by creating a new user account
-/// </summary>
-public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
+public class ResendVerificationEmailCommandHandler : ICommandHandler<ResendVerificationEmailCommand, bool>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IPasswordHasher _passwordHasher;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IAuditLogService _auditLogService;
     private readonly IEmailService _emailService;
+    private readonly IAuditLogService _auditLogService;
     private readonly IConfiguration _configuration;
 
-    public RegisterCommandHandler(
+    public ResendVerificationEmailCommandHandler(
         IUserRepository userRepository,
-        IPasswordHasher passwordHasher,
         IUnitOfWork unitOfWork,
-        IAuditLogService auditLogService,
         IEmailService emailService,
+        IAuditLogService auditLogService,
         IConfiguration configuration)
     {
         _userRepository = userRepository;
-        _passwordHasher = passwordHasher;
         _unitOfWork = unitOfWork;
-        _auditLogService = auditLogService;
         _emailService = emailService;
+        _auditLogService = auditLogService;
         _configuration = configuration;
     }
 
-    /// <summary>
-    /// Processes the registration request by validating the data and creating a new user
-    /// </summary>
-    /// <param name="request">The registration command containing user details</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>A result indicating success or failure with an error message</returns>
-    public async Task<Result<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(ResendVerificationEmailCommand request, CancellationToken cancellationToken)
     {
-        if (await _userRepository.EmailExists(request.Email.ToLower(), cancellationToken))
-        {
-            try
-            {
-                await _auditLogService.LogAsync(new AuditLogRequest
-                {
-                    Level = LogLevel.Warning,
-                    Category = LogCategory.Security,
-                    Message = "Registration attempt failed - email already exists",
-                    UsernameOverride = request.Username,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        ["Email"] = MaskEmail(request.Email),
-                        ["Username"] = request.Username,
-                        ["Reason"] = "EmailExists"
-                    }
-                }, cancellationToken);
-            }
-            catch
-            {
-                // Ignore logging failures
-            }
+        var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
 
-            return Result<bool>.Failure("Email already exists");
+        if (user == null)
+        {
+            return Result<bool>.Failure("User not found");
         }
 
-        if (await _userRepository.UsernameExists(request.Username.ToLower(), cancellationToken))
+        if (user.EmailVerified)
         {
-            try
-            {
-                await _auditLogService.LogAsync(new AuditLogRequest
-                {
-                    Level = LogLevel.Warning,
-                    Category = LogCategory.Security,
-                    Message = "Registration attempt failed - username already exists",
-                    UsernameOverride = request.Username,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        ["Email"] = MaskEmail(request.Email),
-                        ["Username"] = request.Username,
-                        ["Reason"] = "UsernameExists"
-                    }
-                }, cancellationToken);
-            }
-            catch
-            {
-                // Ignore logging failures
-            }
-
-            return Result<bool>.Failure("Username already exists");
+            return Result<bool>.Failure("Email is already verified");
         }
 
-        if (request.Password != request.ConfirmPassword)
-        {
-            return Result<bool>.Failure("Passwords do not match");
-        }
+        // Generate 6-digit code
+        var code = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+        var expiryMinutes = _configuration.GetValue<int>("EmailVerification:ExpiryMinutes", 15);
 
-        var user = User.CreateUser(request.Email.ToLower(), request.Username.ToLower());
-
-        var passwordHashed = _passwordHasher.HashPassword(request.Password);
-        user.SetPassword(passwordHashed);
-
-        await _userRepository.AddAsync(user, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        // Generate and send verification email
-        var verificationCode = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
-        var expiryMinutes = _configuration.GetValue("EmailVerification:ExpiryMinutes", 15);
-
-        user.SetEmailVerificationCode(verificationCode, DateTime.UtcNow.AddMinutes(expiryMinutes));
+        user.SetEmailVerificationCode(code, DateTime.UtcNow.AddMinutes(expiryMinutes));
         await _userRepository.UpdateAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        await SendVerificationEmail(user.Email, user.Username, verificationCode, expiryMinutes);
+        // Send email
+        await SendVerificationEmail(user.Email, user.Username, code, expiryMinutes);
 
+        // Log
         try
         {
             await _auditLogService.LogAsync(new AuditLogRequest
             {
                 Level = LogLevel.Information,
                 Category = LogCategory.Authentication,
-                Message = "User registered successfully",
+                Message = "Verification email resent",
                 UserIdOverride = user.Id,
-                UsernameOverride = user.Username,
-                AdditionalData = new Dictionary<string, object>
-                {
-                    ["UserId"] = user.Id,
-                    ["Username"] = user.Username,
-                    ["Email"] = MaskEmail(user.Email)
-                }
+                UsernameOverride = user.Username
             }, cancellationToken);
         }
         catch
@@ -180,7 +109,7 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
                                         Hi <strong>{username}</strong>,
                                     </p>
                                     <p style="margin: 0 0 20px 0; color: #52525b; font-size: 16px; line-height: 24px;">
-                                        Thank you for creating an account with AutoStack! Please use the following verification code to verify your email address:
+                                        Please use the following verification code to verify your email address:
                                     </p>
 
                                     <table role="presentation" style="margin: 30px 0; width: 100%;">
@@ -216,21 +145,5 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, bool>
         </body>
         </html>
         """;
-    }
-
-    private static string MaskEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email)) return "null";
-
-        var parts = email.Split('@');
-        if (parts.Length != 2) return "invalid";
-
-        var localPart = parts[0];
-        var domain = parts[1];
-
-        if (localPart.Length <= 2)
-            return $"{localPart[0]}***@{domain}";
-
-        return $"{localPart[0]}***{localPart[^1]}@{domain}";
     }
 }

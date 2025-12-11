@@ -69,6 +69,24 @@ public static class RateLimitingExtensions
                 options.QueueLimit = 0;
             });
 
+            // Rate limiter for email verification attempts
+            options.AddFixedWindowLimiter("email-verify", options =>
+            {
+                options.PermitLimit = 5;
+                options.Window = TimeSpan.FromMinutes(15);
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                options.QueueLimit = 0;
+            });
+
+            // Rate limiter for resending verification emails
+            options.AddFixedWindowLimiter("email-resend", options =>
+            {
+                options.PermitLimit = 3;
+                options.Window = TimeSpan.FromHours(1);
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                options.QueueLimit = 0;
+            });
+
             // Rate limiter for sensitive 2FA operations (disable, regenerate codes)
             options.AddPolicy("2fa-sensitive", httpContext =>
                 RateLimitPartition.GetFixedWindowLimiter(

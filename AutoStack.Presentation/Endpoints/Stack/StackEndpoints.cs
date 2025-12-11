@@ -20,30 +20,30 @@ public static class StackEndpoints
         group.MapPost("/create", CreateStack)
             .WithName("CreateStack")
             .WithSummary("Create a new Stack")
-            .RequireAuthorization();
+            .RequireAuthorization("EmailVerified");
 
         group.MapDelete("/deletestack", DeleteStack)
             .WithName("DeleteStack")
             .WithSummary("Delete a stack")
-            .RequireAuthorization();
-        
+            .RequireAuthorization("EmailVerified");
+
         group.MapGet("/getstacks", GetStacks)
             .WithName("GetStacks")
             .WithSummary("Get paginated stacks");
-        
+
         group.MapGet("/getstack", GetStack)
             .WithName("GetStack")
             .WithSummary("Get specific stack");
-        
+
         group.MapGet("/verifiedpackages", GetVerifiedPackages)
             .WithName("Packages")
             .WithSummary("Get packages")
-            .RequireAuthorization();
-        
+            .RequireAuthorization("EmailVerified");
+
         group.MapGet("/mystacks", MyStacks)
             .WithName("MyStacks")
             .WithSummary("Get my stacks")
-            .RequireAuthorization();
+            .RequireAuthorization("EmailVerified");
     }
     
     private static async Task<IResult> CreateStack(

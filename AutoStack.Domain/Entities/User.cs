@@ -44,9 +44,29 @@ public partial class User : Entity<Guid>
     public DateTime? TwoFactorEnabledAt { get; private set; }
 
     public string? PasswordResetToken { get; private set; }
-    
+
     public DateTime? PasswordResetTokenExpiry { get; private set; }
-    
+
+    /// <summary>
+    /// Gets whether the user's email has been verified
+    /// </summary>
+    public bool EmailVerified { get; private set; } = false;
+
+    /// <summary>
+    /// Gets the email verification code
+    /// </summary>
+    public string? EmailVerificationCode { get; private set; }
+
+    /// <summary>
+    /// Gets when the email verification code expires
+    /// </summary>
+    public DateTime? EmailVerificationCodeExpiry { get; private set; }
+
+    /// <summary>
+    /// Gets when the email was verified
+    /// </summary>
+    public DateTime? EmailVerifiedAt { get; private set; }
+
     public User()
     {}
 
@@ -213,5 +233,45 @@ public partial class User : Entity<Guid>
     {
         PasswordResetToken = null;
         PasswordResetTokenExpiry = null;
+    }
+
+    /// <summary>
+    /// Sets the email verification code and expiry
+    /// </summary>
+    /// <param name="code">The 6-digit verification code</param>
+    /// <param name="expiry">When the code expires</param>
+    /// <exception cref="ArgumentException">Thrown when code is null or empty</exception>
+    public void SetEmailVerificationCode(string code, DateTime expiry)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            throw new ArgumentException("Verification code cannot be null or empty", nameof(code));
+        }
+
+        EmailVerificationCode = code;
+        EmailVerificationCodeExpiry = expiry;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Marks the email as verified and clears the verification code
+    /// </summary>
+    public void VerifyEmail()
+    {
+        EmailVerified = true;
+        EmailVerificationCode = null;
+        EmailVerificationCodeExpiry = null;
+        EmailVerifiedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Clears the email verification code without marking as verified
+    /// </summary>
+    public void ClearEmailVerificationCode()
+    {
+        EmailVerificationCode = null;
+        EmailVerificationCodeExpiry = null;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

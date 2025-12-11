@@ -26,9 +26,20 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(512);
 
         builder.Property(x => x.TwoFactorEnabledAt);
-        
+
+        builder.Property(x => x.EmailVerified)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(x => x.EmailVerificationCode)
+            .HasMaxLength(6);
+
+        builder.Property(x => x.EmailVerificationCodeExpiry);
+
+        builder.Property(x => x.EmailVerifiedAt);
+
         builder.HasIndex(x => x.Email).IsUnique();
         builder.HasIndex(x => x.Username).IsUnique();
-        
+
     }
 }

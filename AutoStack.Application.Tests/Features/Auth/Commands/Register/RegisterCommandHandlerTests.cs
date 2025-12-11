@@ -1,8 +1,10 @@
+using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Interfaces.Auth;
 using AutoStack.Application.Features.Auth.Commands.Register;
 using AutoStack.Application.Tests.Common;
 using AutoStack.Domain.Entities;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 
@@ -11,17 +13,26 @@ namespace AutoStack.Application.Tests.Features.Auth.Commands.Register;
 public class RegisterCommandHandlerTests : CommandHandlerTestBase
 {
     private readonly Mock<IPasswordHasher> _mockPasswordHasher;
+    private readonly Mock<IEmailService> _mockEmailService;
+    private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly RegisterCommandHandler _handler;
 
     public RegisterCommandHandlerTests()
     {
         _mockPasswordHasher = new Mock<IPasswordHasher>();
+        _mockEmailService = new Mock<IEmailService>();
+        _mockConfiguration = new Mock<IConfiguration>();
+
+        _mockConfiguration.Setup(c => c.GetSection("EmailVerification:ExpiryMinutes").Value)
+            .Returns("15");
 
         _handler = new RegisterCommandHandler(
             MockUserRepository.Object,
             _mockPasswordHasher.Object,
             MockUnitOfWork.Object,
-            MockAuditLog.Object
+            MockAuditLog.Object,
+            _mockEmailService.Object,
+            _mockConfiguration.Object
         );
     }
 
@@ -359,7 +370,7 @@ public class RegisterCommandHandlerTests : CommandHandlerTestBase
 
         await _handler.Handle(command, CancellationToken.None);
 
-        MockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        MockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact]

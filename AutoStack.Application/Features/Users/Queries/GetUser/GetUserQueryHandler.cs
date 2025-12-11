@@ -35,7 +35,8 @@ public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserResponse>
             user.Id,
             user.Email,
             user.Username,
-            user.AvatarUrl
+            user.AvatarUrl,
+            user.EmailVerified
         );
 
         return Result<UserResponse>.Success(response);
