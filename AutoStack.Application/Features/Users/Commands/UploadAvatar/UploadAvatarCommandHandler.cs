@@ -4,6 +4,7 @@ using AutoStack.Application.Common.Models;
 using AutoStack.Application.DTOs.Users;
 using AutoStack.Domain.Enums;
 using AutoStack.Domain.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStack.Application.Features.Users.Commands.UploadAvatar;
 
@@ -13,17 +14,20 @@ public class UploadAvatarCommandHandler : ICommandHandler<UploadAvatarCommand, U
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFileStorageService _fileStorageService;
     private readonly IAuditLogService _auditLogService;
+    private readonly ILogger<UploadAvatarCommandHandler> _logger;
 
     public UploadAvatarCommandHandler(
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         IFileStorageService fileStorageService,
-        IAuditLogService auditLogService)
+        IAuditLogService auditLogService,
+        ILogger<UploadAvatarCommandHandler> logger)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _fileStorageService = fileStorageService;
         _auditLogService = auditLogService;
+        _logger = logger;
     }
 
     public async Task<Result<UserResponse>> Handle(UploadAvatarCommand request, CancellationToken cancellationToken)
@@ -62,9 +66,10 @@ public class UploadAvatarCommandHandler : ICommandHandler<UploadAvatarCommand, U
                 {
                     await _fileStorageService.DeleteAvatarAsync(oldAvatarUrl, cancellationToken);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Ignore deletion errors
+                    _logger.LogWarning(ex, "Failed to delete old avatar {OldAvatarUrl} for user {UserId}", oldAvatarUrl, user.Id);
+                    // Continue - deletion failure is non-critical
                 }
             }
 
@@ -72,7 +77,7 @@ public class UploadAvatarCommandHandler : ICommandHandler<UploadAvatarCommand, U
             {
                 await _auditLogService.LogAsync(new AuditLogRequest
                 {
-                    Level = LogLevel.Information,
+                    Level = Domain.Enums.LogLevel.Information,
                     Category = LogCategory.User,
                     Message = "User avatar uploaded",
                     UserIdOverride = user.Id,
@@ -86,9 +91,9 @@ public class UploadAvatarCommandHandler : ICommandHandler<UploadAvatarCommand, U
                     }
                 }, cancellationToken);
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore logging failures
+                _logger.LogError(ex, "Failed to log avatar upload audit for user {UserId}", user.Id);
             }
 
             var userResponse = new UserResponse(user.Id, user.Email, user.Username, user.AvatarUrl, user.EmailVerified);

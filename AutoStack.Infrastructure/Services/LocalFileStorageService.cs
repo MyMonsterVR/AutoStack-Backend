@@ -1,5 +1,6 @@
 using AutoStack.Application.Common.Interfaces;
 using AutoStack.Infrastructure.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AutoStack.Infrastructure.Services;
@@ -7,10 +8,12 @@ namespace AutoStack.Infrastructure.Services;
 public class LocalFileStorageService : IFileStorageService
 {
     private readonly FileStorageOptions _options;
+    private readonly ILogger<LocalFileStorageService> _logger;
 
-    public LocalFileStorageService(IOptions<FileStorageOptions> options)
+    public LocalFileStorageService(IOptions<FileStorageOptions> options, ILogger<LocalFileStorageService> logger)
     {
         _options = options.Value;
+        _logger = logger;
 
         if (string.IsNullOrWhiteSpace(_options.BaseUrl))
         {
@@ -58,9 +61,9 @@ public class LocalFileStorageService : IFileStorageService
                 File.Delete(filePath);
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore deletion errors for now
+            _logger.LogWarning(ex, "Failed to delete avatar file from URL {FileUrl}", fileUrl);
         }
 
         return Task.CompletedTask;

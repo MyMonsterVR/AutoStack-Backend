@@ -1,4 +1,6 @@
-﻿using AutoStack.Application.Common.Models;
+﻿using System.Collections.Concurrent;
+using System.Linq.Expressions;
+using AutoStack.Application.Common.Models;
 using FluentValidation;
 using MediatR;
 
@@ -9,11 +11,11 @@ namespace AutoStack.Application.Common.Behaviours;
 /// </summary>
 /// <typeparam name="TRequest">The request type (Command or Query)</typeparam>
 /// <typeparam name="TResponse">The response type (must be a Result)</typeparam>
-public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> 
+public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
-    where TResponse : Result
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
+    private static readonly ConcurrentDictionary<Type, Func<Dictionary<string, string[]>, object>> FailureFactoryCache = new();
 
     /// <summary>
     /// Constructor - MediatR DI automatically injects all validators for TRequest.
@@ -35,29 +37,24 @@ public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TReque
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        // If no validators are registered for this request type, skip validation
         if (!_validators.Any())
         {
             return await next(cancellationToken);
         }
-        
+
         var context = new ValidationContext<TRequest>(request);
 
-        // Run ALL validators for this request type in parallel
         var validationResults = await Task.WhenAll(
             _validators.Select(v => v.ValidateAsync(context, cancellationToken)));
 
-        // Collect all validation failures from all validators
         var failures = validationResults
-            .Where(r => !r.IsValid)              // Only failed validations
-            .SelectMany(r => r.Errors)           // Get all error messages
+            .Where(r => !r.IsValid)
+            .SelectMany(r => r.Errors)
             .ToList();
 
-        // If there are any validation failures, return error result
-        if (failures.Count == 0) return await next(cancellationToken);
-        
-        // Group errors by property name for structured response
-        // Example: { "Email": ["Email is required", "Invalid format"], "Password": ["Too short"] }
+        if (failures.Count == 0)
+            return await next(cancellationToken);
+
         var errors = failures
             .GroupBy(e => e.PropertyName)
             .ToDictionary(
@@ -65,17 +62,42 @@ public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TReque
                 g => g.Select(e => e.ErrorMessage).ToArray()
             );
 
-        var resultType = typeof(TResponse);
-        var failureMethod = resultType.GetMethod(
-            nameof(Result.Failure),
-            [typeof(Dictionary<string, string[]>)]
-        );
+        return CreateValidationFailureResult<TResponse>(errors);
+    }
 
-        if (failureMethod != null)
+    private static TResult CreateValidationFailureResult<TResult>(Dictionary<string, string[]> errors)
+    {
+        var resultType = typeof(TResult);
+
+        var factory = FailureFactoryCache.GetOrAdd(resultType, type =>
         {
-            return (TResponse)failureMethod.Invoke(null, [errors])!;
-        }
+            if (type == typeof(Result))
+            {
+                return errorsDict => Result.Failure(errorsDict);
+            }
 
-        return await next(cancellationToken);
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Result<>))
+            {
+                var failureMethod = type.GetMethod(nameof(Result.Failure), new[] { typeof(Dictionary<string, string[]>) });
+
+                if (failureMethod == null)
+                {
+                    throw new InvalidOperationException($"Unable to find Failure method for type {type.Name}");
+                }
+
+                var errorsParam = Expression.Parameter(typeof(Dictionary<string, string[]>), "errors");
+                var callExpression = Expression.Call(failureMethod, errorsParam);
+                var lambda = Expression.Lambda<Func<Dictionary<string, string[]>, object>>(
+                    Expression.Convert(callExpression, typeof(object)),
+                    errorsParam
+                );
+
+                return lambda.Compile();
+            }
+
+            throw new InvalidOperationException($"Unable to create validation failure for type {type.Name}");
+        });
+
+        return (TResult)factory(errors);
     }
 }

@@ -6,6 +6,7 @@ using AutoStack.Application.DTOs.Users;
 using AutoStack.Domain.Entities;
 using AutoStack.Domain.Enums;
 using AutoStack.Domain.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace AutoStack.Application.Features.Users.Commands.EditUser;
 
@@ -15,13 +16,15 @@ public class EditUserCommandHandler : ICommandHandler<EditUserCommand, UserRespo
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IAuditLogService _auditLogService;
+    private readonly ILogger<EditUserCommandHandler> _logger;
 
-    public EditUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, IAuditLogService auditLogService)
+    public EditUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, IAuditLogService auditLogService, ILogger<EditUserCommandHandler> logger)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _auditLogService = auditLogService;
+        _logger = logger;
     }
 
     public async Task<Result<UserResponse>> Handle(EditUserCommand request, CancellationToken cancellationToken)
@@ -68,21 +71,20 @@ public class EditUserCommandHandler : ICommandHandler<EditUserCommand, UserRespo
                 var isPasswordValid = _passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash);
                 if (!isPasswordValid)
                 {
-                    // Log failed password change attempt
                     try
                     {
                         await _auditLogService.LogAsync(new AuditLogRequest
                         {
-                            Level = LogLevel.Warning,
+                            Level = Domain.Enums.LogLevel.Warning,
                             Category = LogCategory.Security,
                             Message = "Failed password change attempt - incorrect current password",
                             UserIdOverride = user.Id,
                             UsernameOverride = user.Username
                         }, cancellationToken);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Ignore logging failures
+                        _logger.LogError(ex, "Failed to log password change attempt for user {UserId}", user.Id);
                     }
 
                     return Result<UserResponse>.Failure("Current password is invalid");
@@ -101,7 +103,6 @@ public class EditUserCommandHandler : ICommandHandler<EditUserCommand, UserRespo
             await _userRepository.UpdateAsync(user, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Log successful profile update
             if (changedFields.Count > 0)
             {
                 try
@@ -109,7 +110,7 @@ public class EditUserCommandHandler : ICommandHandler<EditUserCommand, UserRespo
                     additionalData["ChangedFields"] = changedFields;
                     await _auditLogService.LogAsync(new AuditLogRequest
                     {
-                        Level = LogLevel.Information,
+                        Level = Domain.Enums.LogLevel.Information,
                         Category = LogCategory.User,
                         Message = $"User profile updated: {string.Join(", ", changedFields)}",
                         UserIdOverride = user.Id,
@@ -117,9 +118,9 @@ public class EditUserCommandHandler : ICommandHandler<EditUserCommand, UserRespo
                         AdditionalData = additionalData
                     }, cancellationToken);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Ignore logging failures
+                    _logger.LogError(ex, "Failed to log profile update audit for user {UserId}", user.Id);
                 }
             }
 
