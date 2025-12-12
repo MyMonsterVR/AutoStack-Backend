@@ -1,5 +1,8 @@
 namespace AutoStack.Application.DTOs.TwoFactor;
 
+/// <summary>
+/// Response DTO containing the current two-factor authentication status for a user
+/// </summary>
 public class TwoFactorStatusResponse
 {
     /// <summary>

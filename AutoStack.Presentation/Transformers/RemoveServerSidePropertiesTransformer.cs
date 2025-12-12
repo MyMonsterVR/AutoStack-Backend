@@ -3,6 +3,9 @@ using Microsoft.OpenApi;
 
 namespace AutoStack.Presentation.Transformers;
 
+/// <summary>
+/// OpenAPI document transformer that removes server-side properties from request schemas
+/// </summary>
 internal sealed class RemoveServerSidePropertiesTransformer : IOpenApiDocumentTransformer
 {
     public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)

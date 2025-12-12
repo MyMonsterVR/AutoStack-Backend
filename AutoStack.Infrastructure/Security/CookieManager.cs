@@ -4,15 +4,51 @@ using AutoStack.Infrastructure.Security.Models;
 
 namespace AutoStack.Infrastructure.Security;
 
+/// <summary>
+/// Service for managing authentication cookies (access and refresh tokens)
+/// </summary>
 public interface ICookieManager
 {
+    /// <summary>
+    /// Sets the access token cookie in the HTTP response
+    /// </summary>
+    /// <param name="httpContext">The HTTP context</param>
+    /// <param name="accessToken">The access token value</param>
+    /// <param name="expirationMinutes">Time before access token expires</param>
     void SetAccessTokenCookie(HttpContext httpContext, string accessToken, int expirationMinutes);
+
+    /// <summary>
+    /// Sets the refresh token cookie in the HTTP response
+    /// </summary>
+    /// <param name="httpContext">The HTTP context</param>
+    /// <param name="refreshToken">The refresh token value</param>
+    /// <param name="expirationDays">Days before refresh token expires</param>
     void SetRefreshTokenCookie(HttpContext httpContext, string refreshToken, int expirationDays);
+
+    /// <summary>
+    /// Gets the access token from the request cookies
+    /// </summary>
+    /// <param name="httpContext">The HTTP context</param>
+    /// <returns>The access token if present, null otherwise</returns>
     string? GetAccessTokenFromCookie(HttpContext httpContext);
+
+    /// <summary>
+    /// Gets the refresh token from the request cookies
+    /// </summary>
+    /// <param name="httpContext">The HTTP context</param>
+    /// <returns>The refresh token if present, null otherwise</returns>
     string? GetRefreshTokenFromCookie(HttpContext httpContext);
+
+    /// <summary>
+    /// Clears the authentication cookies from the response
+    /// </summary>
+    /// <param name="httpContext">The HTTP context</param>
     void ClearAuthCookies(HttpContext httpContext);
 }
 
+/// <summary>
+/// Implementation of cookie manager for authentication cookies
+/// </summary>
 public class CookieManager : ICookieManager
 {
     private readonly CookieSettings _cookieSettings;

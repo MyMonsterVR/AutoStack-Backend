@@ -5,6 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace AutoStack.Infrastructure.Services;
 
+/// <summary>
+/// Local file system implementation of file storage service for avatar uploads
+/// </summary>
 public class LocalFileStorageService : IFileStorageService
 {
     private readonly FileStorageOptions _options;
