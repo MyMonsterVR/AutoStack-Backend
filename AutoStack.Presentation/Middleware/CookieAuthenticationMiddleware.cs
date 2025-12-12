@@ -2,6 +2,10 @@ using AutoStack.Infrastructure.Security;
 
 namespace AutoStack.Presentation.Middleware;
 
+/// <summary>
+/// Middleware that extracts access tokens from cookies and adds them to Authorization header
+/// Enables browser-based authentication using cookies instead of requiring explicit Bearer token headers
+/// </summary>
 public class CookieAuthenticationMiddleware
 {
     private readonly RequestDelegate _next;

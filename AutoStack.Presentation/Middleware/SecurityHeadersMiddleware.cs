@@ -1,5 +1,8 @@
 namespace AutoStack.Presentation.Middleware;
 
+/// <summary>
+/// Middleware that adds security headers to HTTP responses to protect against common web vulnerabilities
+/// </summary>
 public class SecurityHeadersMiddleware
 {
     private readonly RequestDelegate _next;

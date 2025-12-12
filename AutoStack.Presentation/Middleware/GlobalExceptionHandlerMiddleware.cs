@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoStack.Presentation.Middleware;
 
+/// <summary>
+/// Global exception handler middleware that catches and logs unhandled exceptions
+/// </summary>
 public class GlobalExceptionHandlerMiddleware(
     ILogger<GlobalExceptionHandlerMiddleware> logger,
     IHostEnvironment environment)
