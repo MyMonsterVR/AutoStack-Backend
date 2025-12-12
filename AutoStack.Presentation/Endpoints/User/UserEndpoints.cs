@@ -38,7 +38,7 @@ public static class UserEndpoints
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data");
 
-        group.MapPost("/deleteaccount", DeleteAccount)
+        group.MapDelete("/deleteaccount", DeleteAccount)
             .WithName("DeleteAccount")
             .WithSummary("Delete account")
             .RequireAuthorization("EmailVerified");
