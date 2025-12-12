@@ -40,8 +40,7 @@ public static class UserEndpoints
 
         group.MapDelete("/deleteaccount", DeleteAccount)
             .WithName("DeleteAccount")
-            .WithSummary("Delete account")
-            .RequireAuthorization("EmailVerified");
+            .WithSummary("Delete account");
     }
 
     private static async Task<IResult> GetCurrentUser(
