@@ -14,11 +14,6 @@ public enum StackSortByResponse
     Popularity,
 
     /// <summary>
-    /// Sort by rating
-    /// </summary>
-    Rating,
-
-    /// <summary>
     /// Sort by created date
     /// </summary>
     CreatedDate,
