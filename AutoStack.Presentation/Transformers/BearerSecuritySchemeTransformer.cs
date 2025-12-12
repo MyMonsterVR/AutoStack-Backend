@@ -4,6 +4,9 @@ using Microsoft.OpenApi;
 
 namespace AutoStack.Presentation.Transformers;
 
+/// <summary>
+/// OpenAPI document transformer that adds Bearer JWT authentication scheme to all endpoints
+/// </summary>
 internal sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
 {
     private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;

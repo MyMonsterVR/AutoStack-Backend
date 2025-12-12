@@ -1,5 +1,8 @@
 namespace AutoStack.Application.DTOs.TwoFactor;
 
+/// <summary>
+/// Response DTO containing newly generated recovery codes
+/// </summary>
 public class RegenerateRecoveryCodesResponse
 {
     /// <summary>

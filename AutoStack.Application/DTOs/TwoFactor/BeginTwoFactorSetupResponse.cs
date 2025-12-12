@@ -1,5 +1,8 @@
 namespace AutoStack.Application.DTOs.TwoFactor;
 
+/// <summary>
+/// Response DTO for initiating two-factor authentication setup containing QR code and secret
+/// </summary>
 public class BeginTwoFactorSetupResponse
 {
     /// <summary>
