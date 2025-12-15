@@ -1,5 +1,6 @@
 using AutoStack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -7,20 +8,23 @@ using Microsoft.Extensions.Logging;
 namespace AutoStack.Infrastructure.BackgroundServices;
 
 /// <summary>
-/// Background service that runs daily to delete audit logs older than 30 days (GDPR compliance)
+/// Background service that runs daily to delete audit logs older than configured retention period (GDPR compliance)
 /// Runs at 2 AM UTC every day
 /// </summary>
 public class LogCleanupBackgroundService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<LogCleanupBackgroundService> _logger;
+    private readonly IConfiguration _configuration;
 
     public LogCleanupBackgroundService(
         IServiceProvider serviceProvider,
-        ILogger<LogCleanupBackgroundService> logger)
+        ILogger<LogCleanupBackgroundService> logger,
+        IConfiguration configuration)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _configuration = configuration;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -66,18 +70,19 @@ public class LogCleanupBackgroundService : BackgroundService
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var cutoffDate = DateTime.UtcNow.AddDays(-30);
+        var retentionDays = _configuration.GetValue("LogCleanup:RetentionDays", 30);
+        var cutoffDate = DateTime.UtcNow.AddDays(-retentionDays);
 
         _logger.LogInformation(
             "Starting cleanup of audit logs older than {CutoffDate}",
             cutoffDate);
 
-        int totalDeleted = 0;
-        int batchSize = 1000;
+        var totalDeleted = 0;
+        var batchSize = _configuration.GetValue("LogCleanup:BatchSize", 1000);
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            int deletedCount = await dbContext.AuditLogs
+            var deletedCount = await dbContext.AuditLogs
                 .Where(log => log.CreatedAt < cutoffDate)
                 .Take(batchSize)
                 .ExecuteDeleteAsync(cancellationToken);

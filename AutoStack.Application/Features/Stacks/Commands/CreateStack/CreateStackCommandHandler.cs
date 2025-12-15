@@ -119,6 +119,8 @@ public class CreateStackCommandHandler : ICommandHandler<CreateStackCommand, Sta
             Description = loadedStack.Description,
             Type = request.Type,
             Downloads = loadedStack.Downloads,
+            UpvoteCount = loadedStack.UpvoteCount,
+            DownvoteCount = loadedStack.DownvoteCount,
             Packages = stackInfoResponse,
             UserId =  loadedStack.UserId,
             Username = user.Username,

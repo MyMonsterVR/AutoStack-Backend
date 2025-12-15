@@ -1,6 +1,8 @@
 ﻿using AutoStack.Application.Common.Models;
 using AutoStack.Application.Features.Stacks.Commands.CreateStack;
 using AutoStack.Application.Features.Stacks.Commands.DeleteStack;
+using AutoStack.Application.Features.Stacks.Commands.VoteStack;
+using AutoStack.Application.Features.Stacks.Commands.RemoveVote;
 using AutoStack.Application.Features.Stacks.Queries.GetStack;
 using AutoStack.Application.Features.Stacks.Queries.GetStacks;
 using AutoStack.Application.Features.Stacks.Queries.MyStacks;
@@ -44,6 +46,16 @@ public static class StackEndpoints
             .WithName("MyStacks")
             .WithSummary("Get my stacks")
             .RequireAuthorization("EmailVerified");
+
+        group.MapPost("/vote", VoteStack)
+            .WithName("VoteStack")
+            .WithSummary("Vote on a stack (upvote or downvote)")
+            .RequireAuthorization();
+
+        group.MapDelete("/vote", RemoveVote)
+            .WithName("RemoveVote")
+            .WithSummary("Remove vote from a stack")
+            .RequireAuthorization();
     }
     
     private static async Task<IResult> CreateStack(
@@ -209,6 +221,72 @@ public static class StackEndpoints
         {
             success = true,
             data = result.Value
+        });
+    }
+
+    private static async Task<IResult> VoteStack(
+        [FromBody] VoteStackCommand command,
+        IMediator mediator,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var commandWithUser = command with { UserId = authenticatedUserId };
+        var result = await mediator.Send(commandWithUser, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            message = "Vote recorded successfully"
+        });
+    }
+
+    private static async Task<IResult> RemoveVote(
+        [AsParameters] RemoveVoteCommand command,
+        IMediator mediator,
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var commandWithUser = command with { UserId = authenticatedUserId };
+        var result = await mediator.Send(commandWithUser, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = result.Message,
+                errors = result.ValidationErrors
+            });
+        }
+
+        return Results.Ok(new
+        {
+            success = true,
+            message = "Vote removed successfully"
         });
     }
 }

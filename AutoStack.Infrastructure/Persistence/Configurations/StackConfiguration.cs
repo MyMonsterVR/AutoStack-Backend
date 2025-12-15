@@ -29,8 +29,19 @@ public class StackConfiguration : IEntityTypeConfiguration<Stack>
             .IsRequired()
             .HasDefaultValue(0);
 
+        builder.Property(x => x.UpvoteCount)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(x => x.DownvoteCount)
+            .IsRequired()
+            .HasDefaultValue(0);
+
         builder.Property(x => x.UserId)
             .IsRequired();
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
 
         // Relationship with User
         builder.HasOne(x => x.User)
@@ -40,6 +51,12 @@ public class StackConfiguration : IEntityTypeConfiguration<Stack>
 
         // Relationship with StackInfo
         builder.HasMany(x => x.Packages)
+            .WithOne(x => x.Stack)
+            .HasForeignKey(x => x.StackId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Relationship with StackVote
+        builder.HasMany(x => x.Votes)
             .WithOne(x => x.Stack)
             .HasForeignKey(x => x.StackId)
             .OnDelete(DeleteBehavior.Cascade);

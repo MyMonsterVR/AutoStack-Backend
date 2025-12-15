@@ -1,3 +1,4 @@
+using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Features.Users.Queries.GetUser;
 using AutoStack.Application.Tests.Builders;
 using AutoStack.Application.Tests.Common;
@@ -11,10 +12,14 @@ namespace AutoStack.Application.Tests.Features.Users.Queries.GetUser;
 public class GetUserQueryHandlerTests : QueryHandlerTestBase
 {
     private readonly GetUserQueryHandler _handler;
+    private readonly Mock<ICurrentUserService> _mockCurrentUserService;
+    private readonly Mock<IAuditLogService> _mockAuditLogService;
 
     public GetUserQueryHandlerTests()
     {
-        _handler = new GetUserQueryHandler(MockUserRepository.Object);
+        _mockCurrentUserService = new Mock<ICurrentUserService>();
+        _mockAuditLogService = new Mock<IAuditLogService>();
+        _handler = new GetUserQueryHandler(MockUserRepository.Object, _mockCurrentUserService.Object, _mockAuditLogService.Object);
     }
 
     [Fact]
@@ -26,6 +31,8 @@ public class GetUserQueryHandlerTests : QueryHandlerTestBase
             .Build();
 
         var query = new GetUserQuery(user.Id);
+
+        _mockCurrentUserService.Setup(s => s.UserId).Returns(user.Id);
 
         MockUserRepository.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
@@ -45,6 +52,8 @@ public class GetUserQueryHandlerTests : QueryHandlerTestBase
         var userId = Guid.NewGuid();
         var query = new GetUserQuery(userId);
 
+        _mockCurrentUserService.Setup(s => s.UserId).Returns(userId);
+
         MockUserRepository.Setup(r => r.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
@@ -59,6 +68,8 @@ public class GetUserQueryHandlerTests : QueryHandlerTestBase
     {
         var user = new UserBuilder().Build();
         var query = new GetUserQuery(user.Id);
+
+        _mockCurrentUserService.Setup(s => s.UserId).Returns(user.Id);
 
         MockUserRepository.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
@@ -79,6 +90,8 @@ public class GetUserQueryHandlerTests : QueryHandlerTestBase
             .Build();
 
         var query = new GetUserQuery(user.Id);
+
+        _mockCurrentUserService.Setup(s => s.UserId).Returns(user.Id);
 
         MockUserRepository.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
@@ -106,6 +119,8 @@ public class GetUserQueryHandlerTests : QueryHandlerTestBase
 
         var query = new GetUserQuery(user.Id);
 
+        _mockCurrentUserService.Setup(s => s.UserId).Returns(user.Id);
+
         MockUserRepository.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
@@ -119,6 +134,8 @@ public class GetUserQueryHandlerTests : QueryHandlerTestBase
     public async Task Handle_WithEmptyGuid_ShouldReturnFailure()
     {
         var query = new GetUserQuery(Guid.Empty);
+
+        _mockCurrentUserService.Setup(s => s.UserId).Returns(Guid.Empty);
 
         MockUserRepository.Setup(r => r.GetByIdAsync(Guid.Empty, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);

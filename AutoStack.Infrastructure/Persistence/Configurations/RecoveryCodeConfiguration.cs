@@ -16,6 +16,11 @@ public class RecoveryCodeConfiguration : IEntityTypeConfiguration<RecoveryCode>
         builder.Property(r => r.UserId)
             .IsRequired();
 
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.Property(r => r.CodeHash)
             .IsRequired()
             .HasMaxLength(128);

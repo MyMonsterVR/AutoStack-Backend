@@ -1,7 +1,7 @@
+using AutoStack.Application.DTOs.Cli;
+using AutoStack.Application.Features.Cli.Queries.GetCliVersion;
 using AutoStack.Application.Features.Stacks.Commands.TrackDownload;
-using AutoStack.Infrastructure.Persistence;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace AutoStack.Presentation.Endpoints.Cli;
 
@@ -27,18 +27,17 @@ public static class CliEndpoints
             .Produces(429);
     }
 
-    private static async Task<IResult> GetCliVersion(ApplicationDbContext dbContext, CancellationToken cancellationToken)
+    private static async Task<IResult> GetCliVersion(ISender sender, CancellationToken cancellationToken)
     {
-        var cliVersion = await dbContext.CliVersions
-            .AsNoTracking()
-            .FirstOrDefaultAsync(cv => cv.Id == 1, cancellationToken);
+        var query = new GetCliVersionQuery();
+        var result = await sender.Send(query, cancellationToken);
 
-        if (cliVersion == null)
+        if (!result.IsSuccess)
         {
-            return Results.NotFound(new { message = "CLI version not configured" });
+            return Results.NotFound(new { message = result.Message });
         }
 
-        return Results.Ok(new CliVersionResponse { Version = cliVersion.Version });
+        return Results.Ok(result.Value);
     }
 
     private static async Task<IResult> TrackDownload(Guid stackId, ISender sender, CancellationToken cancellationToken)
@@ -53,9 +52,4 @@ public static class CliEndpoints
 
         return Results.Ok(new { message = "Download tracked successfully", downloads = result.Value.Downloads });
     }
-}
-
-public record CliVersionResponse
-{
-    public string Version { get; init; } = string.Empty;
 }

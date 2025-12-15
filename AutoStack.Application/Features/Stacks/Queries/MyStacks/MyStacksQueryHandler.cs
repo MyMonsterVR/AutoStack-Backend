@@ -30,6 +30,8 @@ public class MyStacksQueryHandler : IQueryHandler<MyStacksQuery, IEnumerable<Sta
             Description = s.Description,
             Type = Enum.Parse<StackTypeResponse>(s.Type),
             Downloads = s.Downloads,
+            UpvoteCount = s.UpvoteCount,
+            DownvoteCount = s.DownvoteCount,
             CreatedAt = s.CreatedAt,
             UserId = s.UserId
         });

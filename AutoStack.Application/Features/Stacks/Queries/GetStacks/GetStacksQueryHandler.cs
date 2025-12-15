@@ -37,6 +37,8 @@ public class GetStacksQueryHandler : IQueryHandler<GetStacksQuery, PagedResponse
             Description = s.Description,
             Type = Enum.Parse<StackTypeResponse>(s.Type),
             Downloads = s.Downloads,
+            UpvoteCount = s.UpvoteCount,
+            DownvoteCount = s.DownvoteCount,
             CreatedAt = s.CreatedAt,
             UserId = s.User.Id,
             Username = s.User.Username,

@@ -41,7 +41,8 @@ public class ForgotPasswordCommandHandler : ICommandHandler<ForgotPasswordComman
         }
 
         var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-        user.SetPasswordResetToken(token, DateTime.UtcNow.AddMinutes(15));
+        var expiryMinutes = _configuration.GetValue("PasswordReset:ExpiryMinutes", 15);
+        user.SetPasswordResetToken(token, DateTime.UtcNow.AddMinutes(expiryMinutes));
 
         await _userRepository.UpdateAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

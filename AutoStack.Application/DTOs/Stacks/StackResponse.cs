@@ -34,6 +34,22 @@ public class StackResponse
     public int Downloads { get; set; }
 
     /// <summary>
+    /// Gets or sets the number of upvotes this stack has received
+    /// </summary>
+    public int UpvoteCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of downvotes this stack has received
+    /// </summary>
+    public int DownvoteCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current user's vote on this stack (null if not voted, true if upvoted, false if downvoted)
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? UserVote { get; set; }
+
+    /// <summary>
     /// Gets or sets the list of packages included in the stack
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

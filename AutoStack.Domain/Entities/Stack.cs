@@ -28,14 +28,31 @@ public class Stack : Entity<Guid>
     public int Downloads { get; private set; }
 
     /// <summary>
+    /// Gets the number of upvotes this stack has received
+    /// </summary>
+    public int UpvoteCount { get; private set; }
+
+    /// <summary>
+    /// Gets the number of downvotes this stack has received
+    /// </summary>
+    public int DownvoteCount { get; private set; }
+
+    /// <summary>
     /// Gets the ID of the user who created this stack
     /// </summary>
     public Guid UserId { get; private set; }
+
+    /// <summary>
+    /// Row version for concurrency control
+    /// </summary>
+    public byte[] RowVersion { get; private set; } = [];
 
     // Navigation properties
     public User User { get; private set; } = null!;
     private readonly List<StackInfo> _packages = new();
     public IReadOnlyCollection<StackInfo> Packages => _packages.AsReadOnly();
+    private readonly List<StackVote> _votes = new();
+    public IReadOnlyCollection<StackVote> Votes => _votes.AsReadOnly();
 
     // Parameterless constructor for EF Core
     private Stack()
@@ -48,6 +65,8 @@ public class Stack : Entity<Guid>
         Description = description;
         Type = type;
         Downloads = 0;
+        UpvoteCount = 0;
+        DownvoteCount = 0;
         UserId = userId;
     }
 
@@ -95,5 +114,47 @@ public class Stack : Entity<Guid>
     {
         Downloads++;
         UpdateTimestamp();
+    }
+
+    /// <summary>
+    /// Increments the upvote count and updates the timestamp
+    /// </summary>
+    public void IncrementUpvotes()
+    {
+        UpvoteCount++;
+        UpdateTimestamp();
+    }
+
+    /// <summary>
+    /// Decrements the upvote count (if greater than 0) and updates the timestamp
+    /// </summary>
+    public void DecrementUpvotes()
+    {
+        if (UpvoteCount > 0)
+        {
+            UpvoteCount--;
+            UpdateTimestamp();
+        }
+    }
+
+    /// <summary>
+    /// Increments the downvote count and updates the timestamp
+    /// </summary>
+    public void IncrementDownvotes()
+    {
+        DownvoteCount++;
+        UpdateTimestamp();
+    }
+
+    /// <summary>
+    /// Decrements the downvote count (if greater than 0) and updates the timestamp
+    /// </summary>
+    public void DecrementDownvotes()
+    {
+        if (DownvoteCount > 0)
+        {
+            DownvoteCount--;
+            UpdateTimestamp();
+        }
     }
 }

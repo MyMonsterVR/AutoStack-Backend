@@ -24,44 +24,37 @@ public class DeleteAccountCommandHandler : ICommandHandler<DeleteAccountCommand,
     
     public async Task<Result<bool>> Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
     {
+        if (!request.UserId.HasValue)
+        {
+            return Result<bool>.Failure("User ID is required");
+        }
+
+        var user = await _userRepository.GetByIdAsync(request.UserId.Value, cancellationToken);
+
+        if (user == null)
+        {
+            return Result<bool>.Failure("User not found.");
+        }
+
+        await _userRepository.DeleteAsync(user, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
         try
         {
-            if (!request.UserId.HasValue)
+            await _auditLogService.LogAsync(new AuditLogRequest
             {
-                return Result<bool>.Failure("User ID is required");
-            }
-            
-            var user = await _userRepository.GetByIdAsync(request.UserId.Value, cancellationToken);
-
-            if (user == null)
-            {
-                return Result<bool>.Failure("User not found.");
-            }
-            
-            await _userRepository.DeleteAsync(user, cancellationToken);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            try
-            {
-                await _auditLogService.LogAsync(new AuditLogRequest
-                {
-                    Level = Domain.Enums.LogLevel.Information,
-                    Category = LogCategory.User,
-                    Message = "Account deleted",
-                    UserIdOverride = user.Id,
-                    UsernameOverride = user.Username
-                }, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to log account deletion audit for user {UserId}", user.Id);
-            }
-            
-            return Result<bool>.Success(true);
+                Level = Domain.Enums.LogLevel.Information,
+                Category = LogCategory.User,
+                Message = "Account deleted",
+                UserIdOverride = user.Id,
+                UsernameOverride = user.Username
+            }, cancellationToken);
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure(ex.Message);
+            _logger.LogError(ex, "Failed to log account deletion audit for user {UserId}", user.Id);
         }
+
+        return Result<bool>.Success(true);
     }
 }

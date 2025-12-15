@@ -86,7 +86,7 @@ public class DeleteAccountCommandHandlerTests : CommandHandlerTestBase
     }
     
     [Fact]
-    public async Task Handle_WhenDeleteThrowsException_ShouldReturnFailure()
+    public async Task Handle_WhenDeleteThrowsException_ShouldPropagateException()
     {
         var user = new UserBuilder().Build();
 
@@ -97,15 +97,15 @@ public class DeleteAccountCommandHandlerTests : CommandHandlerTestBase
             .ThrowsAsync(new Exception("Database error"));
 
         var command = new DeleteAccountCommand(user.Id);
-        var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.IsSuccess.Should().BeFalse();
-        result.Message.Should().Be("Database error");
+        var act = async () => await _handler.Handle(command, CancellationToken.None);
+        await act.Should().ThrowAsync<Exception>().WithMessage("Database error");
+
         MockUnitOfWork.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_WhenSaveChangesThrowsException_ShouldReturnFailure()
+    public async Task Handle_WhenSaveChangesThrowsException_ShouldPropagateException()
     {
         var user = new UserBuilder()
             .WithUsername("testuser")
@@ -119,10 +119,9 @@ public class DeleteAccountCommandHandlerTests : CommandHandlerTestBase
             .ThrowsAsync(new Exception("Save failed"));
 
         var command = new DeleteAccountCommand(user.Id);
-        var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.IsSuccess.Should().BeFalse();
-        result.Message.Should().Be("Save failed");
+        var act = async () => await _handler.Handle(command, CancellationToken.None);
+        await act.Should().ThrowAsync<Exception>().WithMessage("Save failed");
     }
 
     [Fact]
