@@ -4,6 +4,7 @@ using AutoStack.Application.Tests.Builders;
 using AutoStack.Application.Tests.Common;
 using AutoStack.Domain.Entities;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -14,12 +15,19 @@ public class GetUserQueryHandlerTests : QueryHandlerTestBase
     private readonly GetUserQueryHandler _handler;
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IAuditLogService> _mockAuditLogService;
+    private readonly Mock<ILogger<GetUserQueryHandler>> _mockLogger;
 
     public GetUserQueryHandlerTests()
     {
         _mockCurrentUserService = new Mock<ICurrentUserService>();
         _mockAuditLogService = new Mock<IAuditLogService>();
-        _handler = new GetUserQueryHandler(MockUserRepository.Object, _mockCurrentUserService.Object, _mockAuditLogService.Object);
+        _mockLogger = new Mock<ILogger<GetUserQueryHandler>>();
+
+        _handler = new GetUserQueryHandler(
+            MockUserRepository.Object,
+            _mockCurrentUserService.Object,
+            _mockAuditLogService.Object,
+            _mockLogger.Object);
     }
 
     [Fact]
