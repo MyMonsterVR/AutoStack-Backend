@@ -1,4 +1,5 @@
-﻿using AutoStack.Application.Common.Interfaces;
+﻿using System.Security.Claims;
+using AutoStack.Application.Common.Interfaces;
 using AutoStack.Application.Common.Models;
 using AutoStack.Application.Features.Users.Commands.DeleteAccount;
 using AutoStack.Application.Features.Users.Commands.EditUser;
@@ -48,15 +49,14 @@ public static class UserEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        // Extract authenticated user's ID from JWT token
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
 
-        var query = new GetUserQuery(authenticatedUserId);
+        var query = new GetUserQuery(userId.Value);
         var result = await mediator.Send(query, cancellationToken);
 
         if (!result.IsSuccess)
@@ -107,14 +107,14 @@ public static class UserEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
         
-        var result = await mediator.Send(command with { UserId = authenticatedUserId }, cancellationToken);
+        var result = await mediator.Send(command with { UserId = userId.Value }, cancellationToken);
 
         if (!result.IsSuccess)
         {
@@ -138,9 +138,9 @@ public static class UserEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
@@ -163,7 +163,7 @@ public static class UserEndpoints
             file.FileName,
             file.ContentType,
             file.Length,
-            authenticatedUserId);
+            userId.Value);
 
         var result = await mediator.Send(command, cancellationToken);
 
@@ -189,14 +189,14 @@ public static class UserEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (string.IsNullOrEmpty(authenticatedUserIdClaim) || !Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
         
-        var result = await mediator.Send(new DeleteAccountCommand(UserId: authenticatedUserId), cancellationToken);
+        var result = await mediator.Send(new DeleteAccountCommand(UserId: userId.Value), cancellationToken);
         
         if (!result.IsSuccess)
         {
@@ -213,5 +213,11 @@ public static class UserEndpoints
             success = true,
             data = result.Value
         });
+    }
+    
+    private static Guid? GetUserIdFromClaims(HttpContext context)
+    {
+        var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
     }
 }

@@ -1,4 +1,5 @@
-﻿using AutoStack.Application.Common.Models;
+﻿using System.Security.Claims;
+using AutoStack.Application.Common.Models;
 using AutoStack.Application.Features.Stacks.Commands.CreateStack;
 using AutoStack.Application.Features.Stacks.Commands.DeleteStack;
 using AutoStack.Application.Features.Stacks.Commands.VoteStack;
@@ -65,14 +66,14 @@ public static class StackEndpoints
         CancellationToken cancellationToken
     )
     {
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (!Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
 
-        var commandWithUser = command with { UserId = authenticatedUserId };
+        var commandWithUser = command with { UserId = userId.Value };
         var result = await mediator.Send(commandWithUser, cancellationToken);
 
         if (!result.IsSuccess)
@@ -123,14 +124,14 @@ public static class StackEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (!Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
         
-        var result = await mediator.Send(command with { UserId = authenticatedUserId }, cancellationToken);
+        var result = await mediator.Send(command with { UserId = userId.Value }, cancellationToken);
         if (!result.IsSuccess)
         {
             return Results.BadRequest(new
@@ -197,14 +198,14 @@ public static class StackEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (!Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
         
-        var query = new MyStacksQuery(authenticatedUserId);
+        var query = new MyStacksQuery(userId.Value);
         var result = await mediator.Send(query, cancellationToken);
 
         if (!result.IsSuccess)
@@ -230,14 +231,14 @@ public static class StackEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (!Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
 
-        var commandWithUser = command with { UserId = authenticatedUserId };
+        var commandWithUser = command with { UserId = userId.Value };
         var result = await mediator.Send(commandWithUser, cancellationToken);
 
         if (!result.IsSuccess)
@@ -263,14 +264,14 @@ public static class StackEndpoints
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
-        var authenticatedUserIdClaim = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetUserIdFromClaims(httpContext);
 
-        if (!Guid.TryParse(authenticatedUserIdClaim, out var authenticatedUserId))
+        if (userId == null)
         {
             return Results.Unauthorized();
         }
 
-        var commandWithUser = command with { UserId = authenticatedUserId };
+        var commandWithUser = command with { UserId = userId.Value };
         var result = await mediator.Send(commandWithUser, cancellationToken);
 
         if (!result.IsSuccess)
@@ -288,5 +289,11 @@ public static class StackEndpoints
             success = true,
             message = "Vote removed successfully"
         });
+    }
+    
+    private static Guid? GetUserIdFromClaims(HttpContext context)
+    {
+        var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
     }
 }
