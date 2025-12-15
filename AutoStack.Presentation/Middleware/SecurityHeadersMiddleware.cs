@@ -14,9 +14,8 @@ public class SecurityHeadersMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Skip security headers for OpenAPI/Scalar endpoints in development
-        if (context.Request.Path.StartsWithSegments("/scalar") ||
-            context.Request.Path.StartsWithSegments("/openapi"))
+        // Skip security headers for Scalar endpoints in development
+        if (context.Request.Path.StartsWithSegments("/scalar"))
         {
             await _next(context);
             return;

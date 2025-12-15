@@ -27,7 +27,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
-        services.Configure<Security.Models.CookieSettings>(configuration.GetSection("CookieSettings"));
+        services.Configure<CookieSettings>(configuration.GetSection("CookieSettings"));
         services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
         services.Configure<TwoFactorSettings>(configuration.GetSection("TwoFactorSettings"));
 
