@@ -15,12 +15,10 @@ public static class EmailVerificationEndpoints
 
         group.MapPost("/verify", VerifyEmail)
             .WithName("VerifyEmail")
-            .WithSummary("Verify email with 6-digit code")
-            .RequireAuthorization()
+            .WithSummary("Verify email with 6-digit code and userId")
             .RequireRateLimiting("email-verify")
             .Produces(200)
             .Produces(400)
-            .Produces(401)
             .Produces(429);
 
         group.MapPost("/resend", ResendVerificationEmail)
@@ -43,17 +41,10 @@ public static class EmailVerificationEndpoints
 
     private static async Task<IResult> VerifyEmail(
         VerifyEmailRequest request,
-        HttpContext context,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var userId = GetUserIdFromClaims(context);
-        if (userId == null)
-        {
-            return Results.Unauthorized();
-        }
-
-        var command = new VerifyEmailCommand(userId.Value, request.Code);
+        var command = new VerifyEmailCommand(request.UserId, request.Code);
         var result = await mediator.Send(command, cancellationToken);
 
         if (!result.IsSuccess)
@@ -69,7 +60,7 @@ public static class EmailVerificationEndpoints
         return Results.Ok(new
         {
             success = true,
-            message = "Email verified successfully"
+            message = "Email verified successfully! You can now login."
         });
     }
 
@@ -141,4 +132,4 @@ public static class EmailVerificationEndpoints
     }
 }
 
-public record VerifyEmailRequest(string Code);
+public record VerifyEmailRequest(Guid UserId, string Code);
